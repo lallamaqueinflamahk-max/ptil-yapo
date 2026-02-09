@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --yapo-white: #FFFFFF;
+  --yapo-blue: #1E3A8A;
+  --yapo-blue-light: #3B82F6;
+  --yapo-orange: #F59E0B;
+  --yapo-orange-light: #FBBF24;
+  --yapo-gray: #F3F4F6;
+  --yapo-gray-dark: #E5E7EB;
+}
+
+body {
+  @apply bg-white text-gray-900 antialiased;
+}
+
+/* Botones gigantes (mín. 56px) - Mobile-First */
+.btn-yapo {
+  @apply min-h-[56px] px-6 text-lg font-semibold rounded-xl flex items-center justify-center gap-2 transition-all;
+}
+
+.btn-yapo-primary {
+  @apply btn-yapo bg-yapo-orange text-white hover:bg-amber-600 shadow-lg;
+}
+
+.btn-yapo-secondary {
+  @apply btn-yapo bg-yapo-blue text-white hover:bg-blue-900;
+}
+
+.btn-yapo-outline {
+  @apply btn-yapo border-2 border-yapo-blue text-yapo-blue bg-white hover:bg-yapo-blue hover:text-white;
+}
+
+.input-yapo {
+  @apply w-full min-h-[52px] px-4 rounded-xl border-2 border-yapo-gray-dark focus:border-yapo-blue focus:ring-2 focus:ring-yapo-blue/20 outline-none text-base;
+}
+
+.label-yapo {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
