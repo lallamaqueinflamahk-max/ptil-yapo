@@ -79,27 +79,25 @@ export default function DashboardMaestroPage() {
   const heatmapPoints: HeatmapPoint[] =
     data?.heatmapPoints?.length ? (data.heatmapPoints as HeatmapPoint[]) : DEFAULT_HEATMAP;
 
-  const renderActiveShape = (props: {
-    cx: number;
-    cy: number;
-    midAngle: number;
-    innerRadius: number;
-    outerRadius: number;
-    startAngle: number;
-    endAngle: number;
-    fill: string;
-    payload: { nombre: string };
-  }) => {
-    const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+  const renderActiveShape = (props: unknown) => {
+    const p = props as {
+      cx: number;
+      cy: number;
+      innerRadius: number;
+      outerRadius: number;
+      startAngle: number;
+      endAngle: number;
+      fill: string;
+    };
     return (
       <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius + 4}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
+        cx={p.cx}
+        cy={p.cy}
+        innerRadius={p.innerRadius}
+        outerRadius={p.outerRadius + 4}
+        startAngle={p.startAngle}
+        endAngle={p.endAngle}
+        fill={p.fill}
         style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
       />
     );
