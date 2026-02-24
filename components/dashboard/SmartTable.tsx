@@ -74,7 +74,7 @@ const CHIP_CLASS: Record<ChipVariant, string> = {
   gray: "bg-gray-100 text-gray-800 border-gray-200",
 };
 
-export default function SmartTable<T extends Record<string, unknown>>({
+export default function SmartTable<T extends object>({
   data,
   columns,
   searchKeys = [],
