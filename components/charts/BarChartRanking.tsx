@@ -121,7 +121,7 @@ export default function BarChartRanking<T extends Record<string, unknown> & { no
             <Tooltip
               content={(props) => (
                 <BarChartTooltip
-                  {...props}
+                  {...(props as Parameters<typeof BarChartTooltip>[0])}
                   valueFormatter={(v) => v.toLocaleString("es-PY")}
                   total={total}
                   showPct={true}
