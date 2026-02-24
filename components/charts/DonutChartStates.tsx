@@ -65,26 +65,27 @@ export default function DonutChartStates({
     setChartFilter({ type: filterType, value: entry.name, label: entry.name });
   };
 
-  const renderLegend = (props: { payload?: { value: string; color: string }[] }) => {
+  const renderLegend = (props: { payload?: Array<{ value?: string; color?: string }> }) => {
     if (!props.payload) return null;
     return (
       <ul className="flex flex-wrap justify-center gap-3 mt-2">
         {props.payload.map((entry) => {
-          const hidden = hiddenLegendKeys.has(`${chartId}:${entry.value}`);
-          const item = data.find((d) => d.name === entry.value);
+          const value = entry.value ?? "";
+          const hidden = hiddenLegendKeys.has(`${chartId}:${value}`);
+          const item = data.find((d) => d.name === value);
           const pct = item && total > 0 ? ((item.value / total) * 100).toFixed(1) : "0";
           return (
             <li
-              key={entry.value}
-              onClick={() => toggleLegendKey(chartId, entry.value)}
+              key={value}
+              onClick={() => toggleLegendKey(chartId, value)}
               className="flex items-center gap-1.5 cursor-pointer select-none text-xs"
             >
               <span
                 className="inline-block w-3 h-3 rounded-full border border-gray-300"
-                style={{ backgroundColor: hidden ? "transparent" : entry.color }}
+                style={{ backgroundColor: hidden ? "transparent" : (entry.color ?? "#94A3B8") }}
               />
               <span className={hidden ? "text-dash-muted line-through" : ""}>
-                {entry.value} ({pct}%)
+                {value} ({pct}%)
               </span>
             </li>
           );
