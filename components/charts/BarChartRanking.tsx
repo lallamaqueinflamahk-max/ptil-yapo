@@ -51,15 +51,15 @@ export default function BarChartRanking<T extends Record<string, unknown> & { no
     return getSemanticColor(index);
   };
 
-  const total = useMemo(
-    () => visibleData.reduce((acc, row) => acc + Number((row[barKey] as number) ?? 0), 0),
-    [visibleData, barKey]
-  );
-
   const visibleData = data.filter((row) => {
     const name = (row[nameKey] ?? row.nombre) as string;
     return !hiddenLegendKeys.has(`${chartId}:${name}`);
   });
+
+  const total = useMemo(
+    () => visibleData.reduce((acc, row) => acc + Number((row[barKey] as number) ?? 0), 0),
+    [visibleData, barKey]
+  );
 
   const handleClick = (state: { activePayload?: { payload?: T }[] }) => {
     const payload = state?.activePayload?.[0]?.payload;
