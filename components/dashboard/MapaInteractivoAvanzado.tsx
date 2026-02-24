@@ -308,7 +308,7 @@ export default function MapaInteractivoAvanzado({
             <button
               key={key}
               type="button"
-              onClick={() => setEstadoFilter(isActive ? null : key)}
+              onClick={() => setEstadoFilter(isActive ? null : (key as "green" | "yellow" | "red"))}
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-bold border-2 transition-all ${
                 isActive ? "text-white shadow-md" : "bg-white text-gray-800 hover:bg-gray-50"
               }`}
