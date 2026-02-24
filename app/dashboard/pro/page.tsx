@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { Users, MapPin, UserCheck, Award, TrendingUp } from "lucide-react";
@@ -18,7 +19,7 @@ const FILTER_LABELS: Record<string, string> = {
   suscriptores: "Suscriptores activos hoy",
 };
 
-export default function DashboardProPage() {
+function ProContent() {
   const searchParams = useSearchParams();
   const filter = searchParams.get("filter") ?? undefined;
   const filterLabel = filter ? FILTER_LABELS[filter] ?? filter : null;
@@ -164,5 +165,19 @@ export default function DashboardProPage() {
         </DashboardCard>
       </div>
     </div>
+  );
+}
+
+export default function DashboardProPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-12 text-dash-muted">
+          Cargando...
+        </div>
+      }
+    >
+      <ProContent />
+    </Suspense>
   );
 }
