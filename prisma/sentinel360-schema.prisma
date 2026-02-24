@@ -1,0 +1,279 @@
+// =============================================================================
+// SENTINEL360 - Esquema de base de datos relacional
+// Usuarios jerárquicos, concejales, seccionales, dirigentes, subscriptores,
+// auditoría, estados de lealtad, verificación e idoneidad laboral.
+// =============================================================================
+// Uso: para activar este esquema, renombrar a schema.prisma o copiar al actual.
+// Recomendado: PostgreSQL en producción (enums nativos, integridad referencial).
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// ENUMS
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  SUPER_ADMIN   // Acceso total al sistema
+  ADMIN         // Gestión por territorio
+  MAESTRO       // Vista ciudad completa (dashboard maestro)
+  PRO           // Concejal / candidato (dashboard pro)
+  OPERADOR      // Validación in situ, registro en terreno
+  CAPACITACION  // Rol capacitación
+}
+
+enum EstadoVerificacion {
+  PENDIENTE
+  EN_REVISION
+  VERIFICADO
+  RECHAZADO
+  TRASPASADO    // Ya enviado a sistema externo (ej. YAPÓ oficial)
+}
+
+enum EstadoLealtad {
+  ACTIVO        // Leal, participativo
+  EN_RIESGO     // Baja interacción
+  INACTIVO      // Sin respuesta
+  RETIRADO
+}
+
+enum ClasificacionIdoneidad {
+  GRUPO_A       // Certificado (SNPP/SINAFOCAL, etc.)
+  GRUPO_B       // Historial empírico comprobable
+  GRUPO_C       // Sin respaldo, derivado a capacitación
+}
+
+enum CargoDirigente {
+  PRESIDENTE_SECCIONAL
+  CONVENCIONAL
+  OTRO
+}
+
+enum TipoEventoAuditoria {
+  LOGIN
+  LOGOUT
+  CREACION
+  ACTUALIZACION
+  ELIMINACION
+  EXPORTACION
+  CAMBIO_ESTADO
+  CAMBIO_ROL
+}
+
+enum TipoVerificacion {
+  IDENTIDAD
+  LABORAL
+  GEOGRAFICA
+  BIOMETRICA
+}
+
+// -----------------------------------------------------------------------------
+// USUARIOS JERÁRQUICOS
+// -----------------------------------------------------------------------------
+
+model Usuario {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email       String   @unique
+  passwordHash String?  // Null si solo auth externo
+  nombre      String
+  rol         UserRole
+  activo      Boolean  @default(true)
+
+  // Relaciones jerárquicas (opcionales según rol)
+  concejalId   String?  @unique
+  seccionalId  String?
+  dirigenteId  String?
+
+  concejal   Concejal?   @relation(fields: [concejalId], references: [id], onDelete: SetNull)
+  seccional  Seccional?  @relation("UsuarioSeccional", fields: [seccionalId], references: [id], onDelete: SetNull)
+  dirigente  Dirigente?  @relation("UsuarioDirigente", fields: [dirigenteId], references: [id], onDelete: SetNull)
+
+  eventosAuditoria EventoAuditoria[]
+}
+
+// -----------------------------------------------------------------------------
+// TERRITORIO: CONCEJALES Y SECCIONALES
+// -----------------------------------------------------------------------------
+
+model Concejal {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nombreCompleto String
+  cedula         String?  @unique
+  contacto       String?
+  activo         Boolean  @default(true)
+
+  usuario   Usuario?    @relation(fields: [id], references: [concejalId])
+  seccionales Seccional[]
+  dirigentes Dirigente[]
+}
+
+model Seccional {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  numero      Int     @unique  // Ej: 1, 2, ... 45
+  nombre      String
+  descripcion String?
+  activo      Boolean @default(true)
+
+  concejalId String?
+  concejal   Concejal? @relation(fields: [concejalId], references: [id], onDelete: SetNull)
+
+  dirigentes    Dirigente[]
+  subscriptores Subscriptor[]
+  usuarios      Usuario[]     @relation("UsuarioSeccional")
+}
+
+// -----------------------------------------------------------------------------
+// DIRIGENTES (Presidentes de Seccional, Convencionales, etc.)
+// -----------------------------------------------------------------------------
+
+model Dirigente {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nombreCompleto String
+  cedula         String?
+  cargo          CargoDirigente
+  contacto       String?
+  activo         Boolean  @default(true)
+
+  seccionalId String
+  seccional   Seccional  @relation(fields: [seccionalId], references: [id], onDelete: Cascade)
+
+  concejalId String?
+  concejal   Concejal?   @relation(fields: [concejalId], references: [id], onDelete: SetNull)
+
+  usuario       Usuario?       @relation("UsuarioDirigente", fields: [id], references: [dirigenteId])
+  subscriptores Subscriptor[]
+  lealtades     EstadoLealtadSubscriptor[]
+}
+
+// -----------------------------------------------------------------------------
+// SUBSCRIPTORES (inscripciones, fichas)
+// -----------------------------------------------------------------------------
+
+model Subscriptor {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Códigos únicos
+  codigoSeguridad    String   @unique  // Uso interno / traspaso
+  codigoVerificacion String   @unique  // Consulta pública del estado
+  estadoVerificacion EstadoVerificacion @default(PENDIENTE)
+
+  // Identidad
+  nombreCompleto String
+  cedulaNro      String
+  cedulaNumero   Int       // Solo números para búsquedas
+
+  // Contacto
+  whatsapp  String
+  email     String?
+  facebook  String?
+  instagram String?
+
+  // Perfil laboral e idoneidad
+  oficioPrincipal    String
+  oficioSecundario   String?
+  experienciaAnios   Int      @default(0)
+  nivelEstudios      String   // SNPP | SINAFOCAL | Empírico | Otros
+  situacionLaboral   String   // Desempleado | Contratado | Independiente
+  seguroSocial       Boolean  @default(false)
+  clasificacionIdoneidad ClasificacionIdoneidad
+  selfieUrl          String?
+  gpsLat             Float?
+  gpsLng             Float?
+
+  // Respaldo / referente
+  promotorNombre String
+  dirigenteId    String?
+  dirigente      Dirigente?  @relation(fields: [dirigenteId], references: [id], onDelete: SetNull)
+  seccionalId    String?
+  seccional      Seccional?  @relation(fields: [seccionalId], references: [id], onDelete: SetNull)
+  cedulaOperador String?     // Si fue validación in situ
+
+  verificaciones   Verificacion[]
+  lealtades        EstadoLealtadSubscriptor[]
+}
+
+// -----------------------------------------------------------------------------
+// VERIFICACIÓN (identidad, laboral, geográfica, biométrica)
+// -----------------------------------------------------------------------------
+
+model Verificacion {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  tipo     TipoVerificacion
+  resultado String   // APROBADO | RECHAZADO | PENDIENTE
+  detalle   String?  // JSON o texto libre
+  proveedor String?  // Incode, Incognia, etc.
+
+  subscriptorId String
+  subscriptor   Subscriptor @relation(fields: [subscriptorId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptorId, tipo])
+}
+
+// -----------------------------------------------------------------------------
+// ESTADOS DE LEALTAD (por dirigente / seccional)
+// -----------------------------------------------------------------------------
+
+model EstadoLealtadSubscriptor {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estado    EstadoLealtad @default(ACTIVO)
+  puntaje   Int?          // Opcional: 0-100 o similar
+  observacion String?
+
+  subscriptorId String
+  subscriptor   Subscriptor @relation(fields: [subscriptorId], references: [id], onDelete: Cascade)
+  dirigenteId   String?
+  dirigente     Dirigente?  @relation(fields: [dirigenteId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptorId, dirigenteId])
+  @@index([dirigenteId, estado])
+  @@index([subscriptorId])
+}
+
+// -----------------------------------------------------------------------------
+// AUDITORÍA
+// -----------------------------------------------------------------------------
+
+model EventoAuditoria {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  tipo      TipoEventoAuditoria
+  entidad   String   // Ej: "Subscriptor", "Usuario", "Seccional"
+  entidadId String?
+  payload   String?  // JSON con datos relevantes (antes/después, filtros, etc.)
+  ip        String?
+  userAgent String?
+
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+
+  @@index([usuarioId])
+  @@index([tipo, createdAt])
+  @@index([entidad, entidadId])
+}

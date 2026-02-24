@@ -8,7 +8,7 @@ export default function GuiaOperador() {
       </h3>
       <ul className="mt-2 space-y-2 text-sm text-orange-950 list-none pl-0">
         <li>
-          <strong>1. Presentate:</strong> Sos un Agente Técnico, no un puntero.
+          <strong>1. Presentate:</strong> Sos un Operador YAPÓ (validación in situ / caza talentos), no un puntero.
         </li>
         <li>
           <strong>2. Evidencia:</strong> Sacá la foto con herramientas (YAPÓ Selfie).

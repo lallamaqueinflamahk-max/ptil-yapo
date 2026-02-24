@@ -118,7 +118,7 @@ export default function LoginModal({
                     >
                       {r === "maestro" && "Maestro"}
                       {r === "pro" && "Pro"}
-                      {r === "operador" && "Operador"}
+                      {r === "operador" && "Operador YAPÓ"}
                       {r === "capacitacion" && "Capacitación"}
                     </button>
                   ))}

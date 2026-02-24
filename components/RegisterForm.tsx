@@ -13,6 +13,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import clsx from "clsx";
+import { useToast } from "@/hooks/useToast";
+import Toast from "@/components/Toast";
 import { getGrupoPreclasificacion } from "@/lib/utils/preclasificacion";
 import { buildSubscriptor } from "@/lib/utils/buildSubscriptor";
 import { getMasterKey, FAKE_FORM_DATA, FAKE_GPS } from "@/lib/utils/masterKey";
@@ -87,6 +89,10 @@ export default function RegisterForm({
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [tipificacionIA, setTipificacionIA] = useState<TipificacionOficioResult | null>(null);
   const [tipificacionLoading, setTipificacionLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [codigoVerificacion, setCodigoVerificacion] = useState<string | null>(null);
+  const { toasts, success, error, dismiss } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -179,11 +185,50 @@ export default function RegisterForm({
     }
   };
 
-  const handleSubmit = () => {
-    const payload = buildSubscriptor(data, gpsCoords);
-    console.log("Submit PTIL (subscriptor)", payload);
-    alert("¡Registro enviado! (simulación)");
-    onClose();
+  const handleSubmit = async () => {
+    setSubmitLoading(true);
+    setCodigoVerificacion(null);
+    try {
+      const res = await fetch("/api/subscriptores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombreCompleto: data.nombreCompleto,
+          cedula: data.cedula,
+          whatsapp: data.whatsapp,
+          email: data.email,
+          facebook: data.facebook,
+          instagram: data.instagram,
+          oficioPrincipal: data.oficioPrincipal,
+          oficioSecundario: data.oficioSecundario,
+          anosExperiencia: data.anosExperiencia,
+          nivelEstudios: data.nivelEstudios,
+          situacion: data.situacion,
+          seguroSocial: data.seguroSocial,
+          selfieDataUrl: data.selfieDataUrl,
+          promotor: data.promotor,
+          gestorZona: data.gestorZona,
+          cargoGestor: data.cargoGestor,
+          seccionalNro: data.seccionalNro,
+          cedulaOperador: data.cedulaOperador,
+          gpsCoords: gpsCoords ? { lat: gpsCoords.lat, lng: gpsCoords.lng } : null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        error(json?.error ?? "No se pudo guardar la inscripción.");
+        setSubmitLoading(false);
+        return;
+      }
+      setSubmitLoading(false);
+      setSubmitSuccess(true);
+      setCodigoVerificacion(json.codigoVerificacion ?? null);
+      success("Inscripción guardada. Guardá tu código de verificación.");
+      setTimeout(() => onClose(), 4000);
+    } catch (e) {
+      error("Error de conexión. Reintentá más tarde.");
+      setSubmitLoading(false);
+    }
   };
 
   return (
@@ -258,7 +303,7 @@ export default function RegisterForm({
                   <button
                     type="button"
                     className="btn-yapo btn-yapo-outline shrink-0 min-h-[52px] px-4"
-                    onClick={() => alert("Simulación: abriría escáner OCR de cédula")}
+                    onClick={() => success("Función de escáner OCR próximamente")}
                   >
                     <ScanLine className="w-5 h-5" />
                     Escanear Cédula OCR
@@ -281,7 +326,7 @@ export default function RegisterForm({
                 )}
               </div>
               <div>
-                <label className="label-yapo">Correo electrónico</label>
+                <label className="label-yapo">Correo electrónico <span className="text-gray-400 font-normal">(opcional)</span></label>
                 <input
                   type="email"
                   value={data.email}
@@ -291,7 +336,7 @@ export default function RegisterForm({
                 />
               </div>
               <div>
-                <label className="label-yapo">Facebook (usuario o enlace de tu perfil)</label>
+                <label className="label-yapo">Facebook (usuario o enlace) <span className="text-gray-400 font-normal">(opcional)</span></label>
                 <input
                   type="text"
                   value={data.facebook}
@@ -301,7 +346,7 @@ export default function RegisterForm({
                 />
               </div>
               <div>
-                <label className="label-yapo">Instagram (usuario o enlace de tu perfil)</label>
+                <label className="label-yapo">Instagram (usuario o enlace) <span className="text-gray-400 font-normal">(opcional)</span></label>
                 <input
                   type="text"
                   value={data.instagram}
@@ -373,7 +418,7 @@ export default function RegisterForm({
                       );
                       setTipificacionIA(res);
                     } catch (e) {
-                      alert("No se pudo tipificar. Reintentá más tarde.");
+                      error("No se pudo tipificar. Reintentá más tarde.");
                     } finally {
                       setTipificacionLoading(false);
                     }
@@ -491,20 +536,22 @@ export default function RegisterForm({
                 );
               })()}
 
-              {/* YAPÓ Selfie */}
+              {/* Selfie de Trabajo (Validación Digital) – YAPÓ Selfie */}
               <div className="border-2 border-yapo-blue/30 rounded-2xl p-4 bg-white">
-                <p className="font-medium text-yapo-blue mb-2">
-                  YAPÓ Selfie – Evidencia laboral
+                <p className="font-medium text-yapo-blue mb-1">
+                  Selfie de Trabajo (La Prueba Real) – YAPÓ Selfie
+                </p>
+                <p className="text-xs text-gray-600 mb-2">
+                  Sacá la foto acá mismo: vos con tu herramienta y de fondo el trabajo (obra, cableado, etc.). No se permite adjuntar archivo ni fotos de galería; la foto debe ser sacada dentro de la app para sello de realidad.
                 </p>
                 {!data.gpsActivo && (
                   <div className="mb-3 p-3 bg-amber-100 text-amber-800 rounded-xl text-sm">
-                    <strong>GPS Activo Obligatorio.</strong> Activá la ubicación
-                    para continuar. No se permite subir fotos de galería.
+                    <strong>GPS activo obligatorio.</strong> La landing no permite enviar la foto sin GPS. El sistema captura latitud, longitud y hora en los metadatos de la imagen.
                   </div>
                 )}
                 {gpsChecked && !data.gpsActivo && (
                   <p className="text-red-600 text-sm mb-2">
-                    Debes activar el GPS para sacar la selfie.
+                    Debes activar el GPS para sacar la selfie. No podés enviar el registro sin ubicación.
                   </p>
                 )}
                 {!data.gpsActivo ? (
@@ -517,7 +564,7 @@ export default function RegisterForm({
                   </button>
                 ) : (
                   <p className="text-green-700 text-sm mb-2 flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4" /> GPS activo
+                    <CheckCircle2 className="w-4 h-4" /> GPS activo (lat, long y hora se guardan)
                   </p>
                 )}
                 <input
@@ -535,7 +582,7 @@ export default function RegisterForm({
                   className="btn-yapo min-h-[60px] w-full border-2 border-dashed border-yapo-orange text-yapo-orange hover:bg-yapo-orange hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Camera className="w-6 h-6" />
-                  Sacar foto con mis herramientas
+                  Sacar Selfie de Trabajo (con herramienta y obra de fondo)
                 </button>
                 {data.selfieDataUrl && (
                   <div className="mt-3 relative rounded-xl overflow-hidden max-h-40">
@@ -659,14 +706,14 @@ export default function RegisterForm({
               {isOperatorFlow && (
                 <div>
                   <label className="label-yapo">
-                    Cédula del Operador YAPÓ (Agente de Validación) *
+                    Cédula del Operador YAPÓ *
                   </label>
                   <input
                     type="text"
                     value={data.cedulaOperador}
                     onChange={(e) => update("cedulaOperador", e.target.value)}
                     className="input-yapo"
-                    placeholder="Obligatorio para validación in situ"
+                    placeholder="Obligatorio para carga directa / validación in situ"
                   />
                 </div>
               )}
@@ -678,19 +725,37 @@ export default function RegisterForm({
                 >
                   <ChevronLeft className="w-5 h-5" /> Atrás
                 </button>
+                {submitSuccess && codigoVerificacion && (
+                  <div className="mb-4 p-4 rounded-xl bg-green-50 border-2 border-green-200">
+                    <p className="text-sm font-medium text-green-800 mb-1">Tu código de verificación</p>
+                    <p className="text-2xl font-bold text-green-900 tracking-wider select-all">{codigoVerificacion}</p>
+                    <p className="text-xs text-green-700 mt-2">Guardalo para consultar el estado de tu inscripción más adelante.</p>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={!canNext3}
-                  className="btn-yapo btn-yapo-primary disabled:opacity-50"
+                  disabled={!canNext3 || submitLoading}
+                  className="btn-yapo btn-yapo-primary disabled:opacity-50 flex items-center gap-2"
                 >
-                  Enviar registro
+                  {submitSuccess ? (
+                    <>
+                      <CheckCircle2 className="w-5 h-5 animate-pulse" /> ¡Enviado!
+                    </>
+                  ) : submitLoading ? (
+                    <>
+                      <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enviando…
+                    </>
+                  ) : (
+                    "Enviar registro"
+                  )}
                 </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+      <Toast toasts={toasts} onDismiss={dismiss} />
     </div>
   );
 }

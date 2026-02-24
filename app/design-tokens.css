@@ -1,0 +1,200 @@
+/**
+ * SENTINEL360 — Design Tokens CSS
+ * Design System: control territorial, métricas, auditoría.
+ * Nomenclatura: --sentinel-* (escalable, sin colisiones).
+ * Uso: var(--sentinel-*) en CSS; Tailwind puede mapear estos tokens en theme.extend.
+ */
+
+:root {
+  /* ==========================================================================
+     COLORES SEMÁNTICOS
+     Un color = un significado en todo el producto. Nunca decorativo.
+     ========================================================================== */
+
+  /* --- Control: navegación activa, CTAs principales, filtros activos --- */
+  --sentinel-color-control: #1E3A8A;
+  --sentinel-color-control-hover: #1E40AF;
+  --sentinel-color-control-on: #FFFFFF; /* texto/icono sobre control */
+
+  /* --- Éxito: dentro de rango, OK, completado, meta alcanzada --- */
+  --sentinel-color-success: #0D9488;
+  --sentinel-color-success-bg: #CCFBF1;
+  --sentinel-color-success-border: #0D9488;
+  --sentinel-color-success-on: #0D9488; /* texto sobre success-bg */
+
+  /* --- Advertencia: revisar pronto, atención, no crítico --- */
+  --sentinel-color-warning: #B45309;
+  --sentinel-color-warning-bg: #FEF3C7;
+  --sentinel-color-warning-border: #B45309;
+  --sentinel-color-warning-on: #B45309; /* texto sobre warning-bg */
+
+  /* --- Riesgo: actuar ya, crítico, alerta --- */
+  --sentinel-color-danger: #B91C1C;
+  --sentinel-color-danger-bg: #FEE2E2;
+  --sentinel-color-danger-border: #B91C1C;
+  --sentinel-color-danger-on: #B91C1C; /* texto sobre danger-bg */
+
+  /* --- Neutral: dato sin juicio, secundario, deshabilitado, ejes --- */
+  --sentinel-color-neutral: #475569;
+  --sentinel-color-neutral-bg: #F1F5F9;
+  --sentinel-color-neutral-border: #94A3B8;
+  --sentinel-color-neutral-on: #475569; /* texto sobre neutral-bg */
+
+  /* --- Base UI (fondos, texto sobre blanco) --- */
+  --sentinel-color-surface: #FFFFFF;
+  --sentinel-color-surface-alt: #F8FAFC;
+  --sentinel-color-text-primary: #111827;   /* títulos, alta jerarquía */
+  --sentinel-color-text-secondary: #475569; /* cuerpo, leyendas */
+  --sentinel-color-text-muted: #64748B;    /* auxiliar, deshabilitado */
+  --sentinel-color-border: #E2E8F0;
+  --sentinel-color-border-strong: #94A3B8;
+
+  /* ==========================================================================
+     TIPOGRAFÍA
+     Familia: Inter (--font-inter en layout); fallback system-ui.
+     ========================================================================== */
+
+  --sentinel-font-family-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* Tamaños (rem para respeto a preferencias de usuario) */
+  --sentinel-font-size-xs: 0.75rem;   /* 12px — chips, leyenda, "Actualizado HH:MM" */
+  --sentinel-font-size-sm: 0.875rem; /* 14px — cuerpo, tabla, descripción */
+  --sentinel-font-size-base: 1rem;   /* 16px — body base */
+  --sentinel-font-size-lg: 1.125rem; /* 18px — título sección, KPI secundario */
+  --sentinel-font-size-xl: 1.25rem;  /* 20px — título de página */
+  --sentinel-font-size-2xl: 1.5rem;  /* 24px — título hero, KPI primario */
+  --sentinel-font-size-3xl: 1.875rem;/* 30px — número KPI destacado */
+
+  /* Pesos (numéricos para font-weight) */
+  --sentinel-font-weight-normal: 400;   /* cuerpo, celdas */
+  --sentinel-font-weight-medium: 500;  /* labels, subtítulos */
+  --sentinel-font-weight-semibold: 600;/* títulos sección, botones, chips */
+  --sentinel-font-weight-bold: 700;     /* KPI, títulos página, alerta crítica */
+
+  /* Altura de línea */
+  --sentinel-line-height-tight: 1.25;   /* títulos */
+  --sentinel-line-height-normal: 1.5;  /* cuerpo */
+  --sentinel-line-height-relaxed: 1.625; /* párrafos largos */
+
+  /* Números tabulares (KPIs, columnas numéricas) */
+  --sentinel-font-feature-tabular: "tnum" 1;
+
+  /* ==========================================================================
+     ESPACIADO (escala 4px)
+     Uso: padding, margin, gap. Base = 4px.
+     ========================================================================== */
+
+  --sentinel-space-0: 0;
+  --sentinel-space-1: 0.25rem;  /* 4px  — icono/texto en botón */
+  --sentinel-space-2: 0.5rem;   /* 8px  — chip, badge */
+  --sentinel-space-3: 0.75rem;  /* 12px — celda, label/valor */
+  --sentinel-space-4: 1rem;    /* 16px — card pequeño, flex gap */
+  --sentinel-space-5: 1.25rem; /* 20px — padding card estándar */
+  --sentinel-space-6: 1.5rem;  /* 24px — entre secciones, grid gap */
+  --sentinel-space-8: 2rem;    /* 32px — entre bloques mayores */
+  --sentinel-space-10: 2.5rem; /* 40px */
+  --sentinel-space-12: 3rem;   /* 48px */
+
+  /* Layout: contenedor y padding horizontal */
+  --sentinel-layout-max-width: 87.5rem;   /* 1400px */
+  --sentinel-layout-padding-mobile: 1rem;   /* 16px */
+  --sentinel-layout-padding-desktop: 1.5rem; /* 24px */
+
+  /* ==========================================================================
+     BORDER RADIUS
+     Consistencia en cards, botones, chips, inputs.
+     ========================================================================== */
+
+  --sentinel-radius-none: 0;
+  --sentinel-radius-sm: 0.25rem;   /* 4px  — chips pequeños */
+  --sentinel-radius-md: 0.5rem;    /* 8px  — badges, inputs cortos */
+  --sentinel-radius-lg: 0.75rem;   /* 12px — botones, cards */
+  --sentinel-radius-xl: 1rem;     /* 16px — cards grandes, modales */
+  --sentinel-radius-2xl: 1.5rem;  /* 24px — hero, paneles */
+  --sentinel-radius-full: 9999px;  /* pills, avatares */
+
+  /* ==========================================================================
+     SOMBRAS
+     Elevación sutil; hover/active para feedback.
+     ========================================================================== */
+
+  --sentinel-shadow-none: none;
+  /* Card en reposo */
+  --sentinel-shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  /* Card hover (KPI, tabla fila) */
+  --sentinel-shadow-card-hover: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  /* Card active / pressed */
+  --sentinel-shadow-card-active: 0 2px 4px -1px rgb(0 0 0 / 0.06);
+  /* Botón primario */
+  --sentinel-shadow-button: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --sentinel-shadow-button-hover: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
+  /* Focus ring (accesibilidad) */
+  --sentinel-shadow-focus: 0 0 0 3px var(--sentinel-color-control);
+
+  /* ==========================================================================
+     ESTADOS (hover, active, disabled, loading)
+     Duraciones y transformaciones estándar para microinteracciones.
+     ========================================================================== */
+
+  /* Duraciones (ms) */
+  --sentinel-state-duration-instant: 0ms;
+  --sentinel-state-duration-fast: 150ms;
+  --sentinel-state-duration-normal: 200ms;  /* estándar dashboard */
+  --sentinel-state-duration-slow: 300ms;
+
+  /* Easing */
+  --sentinel-state-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --sentinel-state-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Hover: escala ligera en cards/botones */
+  --sentinel-state-hover-scale: 1.02;
+  --sentinel-state-hover-scale-button: 1.02;
+
+  /* Active: presión */
+  --sentinel-state-active-scale: 0.98;
+
+  /* Disabled */
+  --sentinel-state-disabled-opacity: 0.5;
+  --sentinel-state-disabled-pointer: not-allowed;
+  --sentinel-state-disabled-cursor: not-allowed;
+
+  /* Loading: spinner / skeleton */
+  --sentinel-state-loading-opacity: 0.7;
+  --sentinel-state-loading-cursor: wait;
+
+  /* Focus (accesibilidad) */
+  --sentinel-state-focus-ring-width: 3px;
+  --sentinel-state-focus-ring-color: var(--sentinel-color-control);
+  --sentinel-state-focus-ring-offset: 2px;
+
+  /* Transición por defecto para controles interactivos */
+  --sentinel-state-transition: color var(--sentinel-state-duration-normal) var(--sentinel-state-ease-out),
+    background-color var(--sentinel-state-duration-normal) var(--sentinel-state-ease-out),
+    border-color var(--sentinel-state-duration-normal) var(--sentinel-state-ease-out),
+    box-shadow var(--sentinel-state-duration-normal) var(--sentinel-state-ease-out),
+    transform var(--sentinel-state-duration-normal) var(--sentinel-state-ease-out),
+    opacity var(--sentinel-state-duration-normal) var(--sentinel-state-ease-out);
+}
+
+/* ==========================================================================
+   ALIASES DE COMPATIBILIDAD (--semantic-*)
+   El Design System y Tailwind ya referencian --semantic-*.
+   Se mantienen apuntando a los tokens --sentinel-* para no romper uso actual.
+   ========================================================================== */
+
+:root {
+  --semantic-control: var(--sentinel-color-control);
+  --semantic-control-hover: var(--sentinel-color-control-hover);
+  --semantic-success: var(--sentinel-color-success);
+  --semantic-success-bg: var(--sentinel-color-success-bg);
+  --semantic-success-border: var(--sentinel-color-success-border);
+  --semantic-warning: var(--sentinel-color-warning);
+  --semantic-warning-bg: var(--sentinel-color-warning-bg);
+  --semantic-warning-border: var(--sentinel-color-warning-border);
+  --semantic-danger: var(--sentinel-color-danger);
+  --semantic-danger-bg: var(--sentinel-color-danger-bg);
+  --semantic-danger-border: var(--sentinel-color-danger-border);
+  --semantic-neutral: var(--sentinel-color-neutral);
+  --semantic-neutral-bg: var(--sentinel-color-neutral-bg);
+  --semantic-neutral-border: var(--sentinel-color-neutral-border);
+}

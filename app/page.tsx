@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import OperatorSection from "@/components/OperatorSection";
+import CaminosRegistro from "@/components/CaminosRegistro";
 import Footer from "@/components/Footer";
 import RegisterForm from "@/components/RegisterForm";
 import { setMasterKey } from "@/lib/utils/masterKey";
@@ -15,8 +15,14 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("master") === "1") {
-      setMasterKey(true);
-      window.history.replaceState({}, "", window.location.pathname);
+      void fetch("/api/master-key")
+        .then((r) => r.json())
+        .then((data: { required: boolean }) => {
+          if (!data.required) {
+            setMasterKey(true);
+          }
+          window.history.replaceState({}, "", window.location.pathname);
+        });
     }
     if (params.get("operador") === "1") {
       setIsOperatorFlow(true);
@@ -25,13 +31,18 @@ export default function Home() {
     }
   }, []);
 
-  const openRegister = () => {
+  const openViaA = () => {
     setIsOperatorFlow(false);
     setShowForm(true);
   };
 
-  const openOperatorValidation = () => {
+  const openViaB = () => {
     setIsOperatorFlow(true);
+    setShowForm(true);
+  };
+
+  const openViaC = () => {
+    setIsOperatorFlow(false);
     setShowForm(true);
   };
 
@@ -39,8 +50,8 @@ export default function Home() {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1">
-        <Hero onRegister={openRegister} />
-        <OperatorSection onValidationInSitu={openOperatorValidation} />
+        <Hero onRegister={openViaA} />
+        <CaminosRegistro onViaA={openViaA} onViaB={openViaB} onViaC={openViaC} />
       </main>
       <Footer />
 

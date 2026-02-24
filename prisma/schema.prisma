@@ -1,0 +1,104 @@
+// PTIL YAPÓ - Inscripción de subscriptores (suscripción gratuita).
+// Datos para traspaso posterior a la página oficial de YAPÓ.
+// Producción: usar PostgreSQL (DATABASE_URL). Dev: SQLite.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Ficha de inscripción = un subscriptor registrado.
+// codigo_seguridad: uso interno y traspaso a YAPÓ oficial.
+// codigo_verificacion: código corto para que el subscriptor consulte su estado.
+model Ficha {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Códigos únicos
+  codigoSeguridad   String   @unique // Ej: PTIL-2026-A1B2C3D4 (interno/traspaso)
+  codigoVerificacion String @unique // Ej: 8 caracteres alfanuméricos (consulta pública)
+  estadoVerificacion String @default("PENDIENTE") // PENDIENTE | VERIFICADO | TRASPASADO
+
+  // Identidad
+  nombreCompleto String
+  cedulaNro      String // Guardamos string para preservar formato (ej. 4.123.456)
+  cedulaNumero  Int    // Solo números, para búsquedas
+
+  // Contacto
+  whatsapp  String
+  email     String?
+  facebook  String?
+  instagram String?
+
+  // Perfil laboral
+  oficioPrincipal   String
+  oficioSecundario  String?
+  experienciaAnios  Int    @default(0)
+  nivelEstudios     String // SNPP | SINAFOCAL | Empírico | Otros
+  situacion         String // Desempleado | Contratado | Independiente
+  seguroSocial      Boolean @default(false)
+  selfieDataUrl     String? // Base64 o URL cuando haya almacenamiento externo
+  gpsLat            Float?
+  gpsLng            Float?
+
+  // Respaldo confianza
+  promotorYapo     String
+  gestorZona       String
+  cargoGestor      String // Presidente de Seccional | Convencional
+  seccionalNro     String
+  cedulaOperador   String? // Si fue validación in situ (Vía B - carga directa)
+
+  // Geofencing: asignación "el primero que llega, gana"
+  asignadoOperadorCedula String?  // Operador YAPÓ que tomó la verificación
+  asignadoAt             DateTime?
+
+  // Dictamen del Operador YAPÓ al Comité
+  dictamenOperador     String?   // APROBADO | APROBADO_OBSERVACION | RECHAZADO | DERIVAR_CAPACITACION
+  dictamenAt           DateTime?
+  evidenciaFaltaEquipo Boolean?  // true = marcó "Falta de Equipamiento/equipamientos ajenos"
+
+  // Clasificación automática (Grupo A/B/C)
+  clasificacionAutomatica String
+
+  derivacion   DerivacionCapacitacion?
+  certificaciones Certificacion[]
+}
+
+// Derivación automática a capacitación (Grupo C, opcionalmente B).
+model DerivacionCapacitacion {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  fichaId          String   @unique
+  ficha            Ficha    @relation(fields: [fichaId], references: [id], onDelete: Cascade)
+  grupoOrigen      String   // Grupo A | Grupo B | Grupo C
+  estado           String   @default("PENDIENTE") // PENDIENTE | EN_CURSO | COMPLETADO
+  fechaDerivacion  DateTime @default(now())
+}
+
+// Certificaciones registradas (SNPP, SINAFOCAL, etc.).
+model Certificacion {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  fichaId      String
+  ficha        Ficha    @relation(fields: [fichaId], references: [id], onDelete: Cascade)
+  tipo         String   // SNPP | SINAFOCAL | OTRO
+  institucion  String
+  fechaEmision DateTime
+  numeroTitulo String?
+}
+
+// Operador YAPÓ: zona (seccional) para geofencing "alertas en tu zona".
+model Operador {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  cedula        String   @unique // Cédula del operador (identificador)
+  seccionalNro  String   // Zona/barrio para recibir alertas
+  nombreCompleto String?
+}

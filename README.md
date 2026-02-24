@@ -1,4 +1,7 @@
 # yap--Programa-Territorial-de-idoneidad-Laboral-PTIL-YAPÓ - Programa Territorial de Idoneidad Laboral (PTIL) 🇵🇾
+
+**Nota:** En la interfaz del dashboard el producto se presenta como **Territorio Command**. El **Design System** que unifica colores, componentes y patrones se llama **SENTINEL360** (ver `docs/DESIGN-SYSTEM-SENTINEL360.md`).
+
 📋 Descripción General
 YAPÓ es una plataforma Insurtech y de gestión territorial desarrollada por Guaraní Global Tech (GGT). El sistema implementa el Operativo PTIL, un censo digital diseñado para organizar y formalizar la fuerza laboral informal de Asunción.
 
@@ -39,6 +42,8 @@ Interfaz de nivel superior para la gestión de toda la ciudad (44 Seccionales), 
 Frontend: Next.js 14 (App Router) y Tailwind CSS para una UI rápida y responsiva.
 
 Backend: Node.js con Edge Functions en Vercel para procesamiento de baja latencia.
+
+Base de datos (inscripción de subscriptores): Prisma ORM con SQLite (desarrollo) o PostgreSQL (producción). Cada ficha tiene un **código de seguridad** (uso interno/traspaso a YAPÓ oficial) y un **código de verificación** (consulta pública del estado). Ver `.env.example` para `DATABASE_URL`. Comandos: `npm run db:generate`, `npm run db:push` o `npm run db:migrate`.
 
 Inteligencia Artificial: Modelos multimodales para tipificación de oficios y auditoría de imágenes.
 

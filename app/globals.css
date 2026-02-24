@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design System SENTINEL360 — tokens CSS (color, tipografía, spacing, sombras, estados) */
+@import "./design-tokens.css";
+
 :root {
+  /* Brand / identidad (logos, marca) — fuera del design system de producto */
   --yapo-white: #FFFFFF;
   --yapo-blue: #1E3A8A;
   --yapo-blue-light: #3B82F6;
@@ -13,24 +17,25 @@
 }
 
 body {
-  @apply bg-white text-gray-900 antialiased;
+  @apply text-gray-900 antialiased min-h-screen;
+  background: #F8FAFC;
 }
 
-/* Botones gigantes (mín. 56px) - Mobile-First */
+/* Botones gigantes (mín. 56px) - Mobile-First, dinámicos */
 .btn-yapo {
-  @apply min-h-[56px] px-6 text-lg font-semibold rounded-xl flex items-center justify-center gap-2 transition-all;
+  @apply min-h-[56px] px-6 text-lg font-semibold rounded-xl flex items-center justify-center gap-2 transition-all duration-200;
 }
 
 .btn-yapo-primary {
-  @apply btn-yapo bg-yapo-orange text-white hover:bg-amber-600 shadow-lg;
+  @apply btn-yapo bg-[#1E3A8A] text-white hover:bg-[#1E40AF] shadow-md hover:shadow-lg active:shadow-sm;
 }
 
 .btn-yapo-secondary {
-  @apply btn-yapo bg-yapo-blue text-white hover:bg-blue-900;
+  @apply btn-yapo bg-gradient-to-r from-yapo-blue to-blue-700 text-white hover:from-blue-800 hover:to-blue-900 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 active:shadow-md hover:scale-[1.02] active:scale-[0.98];
 }
 
 .btn-yapo-outline {
-  @apply btn-yapo border-2 border-yapo-blue text-yapo-blue bg-white hover:bg-yapo-blue hover:text-white;
+  @apply btn-yapo border-2 border-yapo-blue text-yapo-blue bg-white hover:bg-yapo-blue hover:text-white hover:scale-[1.02] active:scale-[0.98];
 }
 
 .input-yapo {
@@ -39,4 +44,83 @@ body {
 
 .label-yapo {
   @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+/* Dashboard: ocultar scrollbar en nav horizontal manteniendo scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mapa interactivo: tooltip hover seccional (semáforo + preview) */
+.leaflet-tooltip.mapa-tooltip-seccional {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 8px 12px;
+}
+
+/* Marcadores con número de recuento: sin icono por defecto de Leaflet */
+.leaflet-marker-icon.seccional-marker-num {
+  background: transparent !important;
+  border: none !important;
+}
+.leaflet-marker-icon.seccional-marker-num > div {
+  cursor: pointer;
+}
+
+/* Logo YAPÓ: un solo pulso constante (respira), mismo lugar */
+@keyframes logo-yapo-heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.logo-yapo-3d-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo-yapo-3d-inner {
+  position: relative;
+  transform-origin: center center;
+  animation: logo-yapo-heartbeat 1.5s ease-in-out infinite;
+}
+.logo-yapo-3d-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+}
+.logo-yapo-3d-face-front {
+  transform: translateZ(0);
+}
+.logo-yapo-3d-face-back {
+  transform: rotateY(180deg) translateZ(0);
+  visibility: hidden;
+}
+.logo-yapo-3d-face-front img {
+  max-width: 100%;
+}
+
+/* Indicadores clave: brillo en tiempo real y anillo animado */
+@keyframes kpi-glow-pulse {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.95; filter: brightness(1.08); }
+}
+@keyframes kpi-ring-draw {
+  from { stroke-dasharray: 0 100; }
+}
+.kpi-card-live {
+  animation: kpi-glow-pulse 2.5s ease-in-out infinite;
+}
+.kpi-ring-animated circle:last-of-type {
+  animation: kpi-ring-draw 1s ease-out forwards;
+}
+.kpi-live-dot {
+  animation: kpi-glow-pulse 1.2s ease-in-out infinite;
 }
