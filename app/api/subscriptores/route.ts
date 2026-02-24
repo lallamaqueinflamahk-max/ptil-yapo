@@ -5,8 +5,18 @@ import type { FormDataLike, GpsCoords } from "@/lib/utils/buildSubscriptor";
 type Body = FormDataLike & { gpsCoords: { lat: number; lng: number } | null };
 
 export async function POST(request: NextRequest) {
+  // #region agent log
+  try {
+    await fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "api/subscriptores/route.ts:POST", message: "API entry", data: {}, hypothesisId: "H3", timestamp: Date.now() }) }).catch(() => {});
+  } catch (_) {}
+  // #endregion
   try {
     const body = (await request.json()) as Body;
+    // #region agent log
+    try {
+      await fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "api/subscriptores/route.ts:afterJson", message: "request.json done", data: { keys: Object.keys(body) }, hypothesisId: "H3", timestamp: Date.now() }) }).catch(() => {});
+    } catch (_) {}
+    // #endregion
     const {
       nombreCompleto,
       cedula,
@@ -41,6 +51,11 @@ export async function POST(request: NextRequest) {
         ? { lat: gpsCoords.lat, lng: gpsCoords.lng }
         : null;
 
+    // #region agent log
+    try {
+      await fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "api/subscriptores/route.ts:beforeCrearFicha", message: "before crearFicha", data: {}, hypothesisId: "H4", timestamp: Date.now() }) }).catch(() => {});
+    } catch (_) {}
+    // #endregion
     const result = await crearFicha({
       nombreCompleto,
       cedula,
@@ -63,6 +78,11 @@ export async function POST(request: NextRequest) {
       gpsCoords: gps,
     });
 
+    // #region agent log
+    try {
+      await fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "api/subscriptores/route.ts:afterCrearFicha", message: "crearFicha success", data: { id: result.id }, hypothesisId: "H4", timestamp: Date.now() }) }).catch(() => {});
+    } catch (_) {}
+    // #endregion
     return NextResponse.json({
       ok: true,
       codigoVerificacion: result.codigoVerificacion,
@@ -71,6 +91,11 @@ export async function POST(request: NextRequest) {
       mensaje: "Inscripción registrada. Guardá tu código de verificación para consultar el estado.",
     });
   } catch (e) {
+    // #region agent log
+    try {
+      await fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "api/subscriptores/route.ts:catch", message: "API catch", data: { errName: (e as Error)?.name, errMessage: (e as Error)?.message }, hypothesisId: "H3,H4", timestamp: Date.now() }) }).catch(() => {});
+    } catch (_) {}
+    // #endregion
     console.error("Error al crear ficha:", e);
     return NextResponse.json(
       { error: "No se pudo guardar la inscripción. Reintentá más tarde." },

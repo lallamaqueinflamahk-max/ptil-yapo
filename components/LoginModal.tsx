@@ -48,31 +48,35 @@ export default function LoginModal({
             onClick={onClose}
             aria-hidden
           />
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="login-title"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed left-1/2 top-[8vh] -translate-x-1/2 z-50 w-full max-w-md max-h-[84vh] overflow-y-auto bg-white rounded-2xl shadow-xl p-6 mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 id="login-title" className="text-xl font-bold text-yapo-blue">
-                Acceso Staff
-              </h2>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-2 rounded-lg hover:bg-yapo-gray text-gray-500"
-                aria-label="Cerrar"
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none overflow-hidden">
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="login-title"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md max-h-[calc(100vh-2rem)] min-h-0 flex flex-col bg-white rounded-2xl shadow-xl pointer-events-auto overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex-shrink-0 flex justify-between items-center p-4 pb-0">
+                <h2 id="login-title" className="text-xl font-bold text-yapo-blue">
+                  Acceso Staff
+                </h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-2 rounded-lg hover:bg-yapo-gray text-gray-500"
+                  aria-label="Cerrar"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div
+                className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 pt-4"
+                style={{ paddingLeft: "max(1rem, env(safe-area-inset-left))", paddingRight: "max(1rem, env(safe-area-inset-right))" }}
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="login-email" className="label-yapo block mb-1">
                   Correo / Usuario
@@ -135,8 +139,10 @@ export default function LoginModal({
               <button type="submit" className="btn-yapo btn-yapo-primary w-full min-h-[48px] text-base font-semibold">
                 Iniciar sesión
               </button>
-            </form>
-          </motion.div>
+                </form>
+              </div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

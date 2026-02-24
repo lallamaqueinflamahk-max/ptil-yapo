@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { DashboardChartProvider } from "@/context/DashboardChartContext";
 import DashboardAvatar from "@/components/dashboard/DashboardAvatar";
+import AsistenteMaestroBar from "@/components/dashboard/AsistenteMaestroBar";
 import { PRODUCT, NAV } from "@/lib/copy/dashboard";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -93,6 +94,7 @@ export default function DashboardLayout({
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <DashboardChartProvider>{children}</DashboardChartProvider>
       </main>
+      <AsistenteMaestroBar />
     </div>
   );
 }

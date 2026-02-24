@@ -25,19 +25,13 @@ export default function CaminosRegistro({ onViaA, onViaB, onViaC }: CaminosRegis
           <div className="relative w-full aspect-[3/4] min-h-[220px] bg-gradient-to-b from-slate-800 via-blue-900 to-slate-800 overflow-hidden">
             <Image
               src="/images/auto-registro-cta.png"
-              alt="Auto-Registro: cargá tu cédula, datos y foto desde tu celular. Pendiente de verificación."
+              alt="Auto-Registro: cargá tu cédula, datos y foto desde tu celular."
               fill
               className="object-contain object-center p-3 group-hover:scale-[1.02] transition-transform duration-300"
               sizes="(max-width: 768px) 100vw, 33vw"
               unoptimized
               priority
             />
-            <div className="absolute bottom-2 left-2 right-2 flex justify-center">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400/95 text-slate-900 text-xs font-bold shadow-lg">
-                <Bell className="w-3.5 h-3.5" />
-                Pendiente de verificación
-              </span>
-            </div>
           </div>
           <div className="p-5 flex flex-col flex-1">
             <div className="flex items-center gap-2 mb-2">

@@ -188,32 +188,42 @@ export default function RegisterForm({
   const handleSubmit = async () => {
     setSubmitLoading(true);
     setCodigoVerificacion(null);
+    // #region agent log
+    fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:handleSubmit", message: "submit started", data: { step, hasSelfie: !!data.selfieDataUrl, hasGps: !!gpsCoords }, hypothesisId: "H5", timestamp: Date.now() }) }).catch(() => {});
+    // #endregion
     try {
+      const body = {
+        nombreCompleto: data.nombreCompleto,
+        cedula: data.cedula,
+        whatsapp: data.whatsapp,
+        email: data.email,
+        facebook: data.facebook,
+        instagram: data.instagram,
+        oficioPrincipal: data.oficioPrincipal,
+        oficioSecundario: data.oficioSecundario,
+        anosExperiencia: data.anosExperiencia,
+        nivelEstudios: data.nivelEstudios,
+        situacion: data.situacion,
+        seguroSocial: data.seguroSocial,
+        selfieDataUrl: data.selfieDataUrl,
+        promotor: data.promotor,
+        gestorZona: data.gestorZona,
+        cargoGestor: data.cargoGestor,
+        seccionalNro: data.seccionalNro,
+        cedulaOperador: data.cedulaOperador,
+        gpsCoords: gpsCoords ? { lat: gpsCoords.lat, lng: gpsCoords.lng } : null,
+      };
+      // #region agent log
+      fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:beforeFetch", message: "calling fetch", data: { url: "/api/subscriptores" }, hypothesisId: "H1", timestamp: Date.now() }) }).catch(() => {});
+      // #endregion
       const res = await fetch("/api/subscriptores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombreCompleto: data.nombreCompleto,
-          cedula: data.cedula,
-          whatsapp: data.whatsapp,
-          email: data.email,
-          facebook: data.facebook,
-          instagram: data.instagram,
-          oficioPrincipal: data.oficioPrincipal,
-          oficioSecundario: data.oficioSecundario,
-          anosExperiencia: data.anosExperiencia,
-          nivelEstudios: data.nivelEstudios,
-          situacion: data.situacion,
-          seguroSocial: data.seguroSocial,
-          selfieDataUrl: data.selfieDataUrl,
-          promotor: data.promotor,
-          gestorZona: data.gestorZona,
-          cargoGestor: data.cargoGestor,
-          seccionalNro: data.seccionalNro,
-          cedulaOperador: data.cedulaOperador,
-          gpsCoords: gpsCoords ? { lat: gpsCoords.lat, lng: gpsCoords.lng } : null,
-        }),
+        body: JSON.stringify(body),
       });
+      // #region agent log
+      fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:afterFetch", message: "fetch completed", data: { status: res.status, ok: res.ok, contentType: res.headers.get("content-type") }, hypothesisId: "H1,H2", timestamp: Date.now() }) }).catch(() => {});
+      // #endregion
       const json = await res.json();
       if (!res.ok) {
         error(json?.error ?? "No se pudo guardar la inscripción.");
@@ -226,6 +236,9 @@ export default function RegisterForm({
       success("Inscripción guardada. Guardá tu código de verificación.");
       setTimeout(() => onClose(), 4000);
     } catch (e) {
+      // #region agent log
+      fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:catch", message: "submit catch", data: { errName: (e as Error)?.name, errMessage: (e as Error)?.message }, hypothesisId: "H1,H2,H5", timestamp: Date.now() }) }).catch(() => {});
+      // #endregion
       error("Error de conexión. Reintentá más tarde.");
       setSubmitLoading(false);
     }
