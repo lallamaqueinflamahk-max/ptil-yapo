@@ -15,10 +15,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loadingLabel?: string;
 }
 
-const variantStyles: Record<
-  ButtonVariant,
-  { base: string; hover: string; active: string; disabled: string; focus: string }
-> = {
+const variantStyles: Record<ButtonVariant, string> = {
   primary:
     "bg-semantic-control text-semantic-control-on shadow-button hover:bg-semantic-control-hover hover:shadow-button-hover active:shadow-card-active focus-visible:outline focus-visible:ring-2 focus-visible:ring-semantic-control focus-visible:ring-offset-2 disabled:opacity-disabled disabled:pointer-events-none",
   secondary:
@@ -55,11 +52,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={clsx(
           "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sentinel-lg px-4 py-2 text-sm font-semibold transition-all duration-dashboard ease-sentinel-out",
           "hover:scale-[1.02] active:scale-[0.98]",
-          variantStyles[variant].base,
-          !isDisabled && variantStyles[variant].hover,
-          !isDisabled && variantStyles[variant].active,
-          isDisabled && variantStyles[variant].disabled,
-          variantStyles[variant].focus,
+          variantStyles[variant],
           fullWidth && "w-full",
           className
         )}
