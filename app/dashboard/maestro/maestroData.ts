@@ -26,7 +26,7 @@ export function buildPuntosCalor(
 ): Array<{ id: number; lat: number; lng: number; cantidad: number; color: string; label?: string }> {
   const out: Array<{ id: number; lat: number; lng: number; cantidad: number; color: string; label?: string }> = [];
   for (const p of heatmapPoints) {
-    out.push({ id: p.id, lat: p.lat, lng: p.lng, cantidad: p.cantidad, color: p.color, label: p.label });
+    out.push({ id: p.id, lat: p.lat, lng: p.lng, cantidad: p.cantidad, color: p.color ?? "#1E3A8A", label: p.label });
   }
   return out;
 }
