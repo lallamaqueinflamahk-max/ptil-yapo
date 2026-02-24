@@ -15,7 +15,8 @@ export interface EtapaEmbudo {
 }
 
 export interface EmbudoIdoneidadProps {
-  etapas: EtapaEmbudo[];
+  /** Etapas del embudo; si no se pasan, se usan las por defecto */
+  etapas?: EtapaEmbudo[];
   /** Meta en porcentaje (ej. 22) */
   metaPorcentaje?: number;
   /** Total para calcular % (si no se pasa, se usa suma de etapas) */
