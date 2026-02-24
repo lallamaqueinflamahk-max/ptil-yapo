@@ -206,7 +206,7 @@ export default function PanelAlertas({
 
   const handleClickAlerta = useCallback(
     (a: Alerta) => {
-      if (a.filterKey) {
+      if (a.filterKey && setChartFilter) {
         setChartFilter({
           type: a.filterKey.type,
           value: a.filterKey.value,
