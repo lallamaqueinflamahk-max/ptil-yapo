@@ -40,6 +40,8 @@ const ZOOM_LABEL: Record<ZoomSemantico, string> = {
   seccional: "Vista seccional",
 };
 
+type LeafletLayerGroup = ReturnType<typeof import("leaflet").layerGroup>;
+
 export default function MapaControlDashboard({
   seccionales,
   capas,
@@ -49,7 +51,7 @@ export default function MapaControlDashboard({
   const { chartFilter, setChartFilter, resetChartFilter, setMapViewState } = useDashboardCharts();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<ReturnType<typeof import("leaflet").map> | null>(null);
-  const layerGroupsRef = useRef<Record<string, ReturnType<typeof import("leaflet").layerGroup>>({});
+  const layerGroupsRef = useRef<{ [key: string]: LeafletLayerGroup }>({});
   const seccionalesLayerRef = useRef<ReturnType<typeof import("leaflet").layerGroup> | null>(null);
   const markersRef = useRef<ReturnType<typeof import("leaflet").Marker>[]>([]);
 
