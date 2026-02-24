@@ -23,7 +23,7 @@ export interface QuickFilterOption {
   label: string;
 }
 
-export interface OperationalTableProps<T extends Record<string, unknown>> {
+export interface OperationalTableProps<T extends object> {
   /** Datos de la tabla */
   data: T[];
   /** Definición de columnas. La primera puede ser la columna visual de estado. */
@@ -64,7 +64,7 @@ function getEstadoVariant(value: unknown): "success" | "warning" | "danger" | "n
   return ESTADO_BADGE[s] ?? "neutral";
 }
 
-export function OperationalTable<T extends Record<string, unknown>>({
+export function OperationalTable<T extends object>({
   data,
   columns,
   filterValueKey,
