@@ -530,7 +530,7 @@ export default function DashboardMaestroPage() {
                 className="w-full rounded-xl border-2 border-gray-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none"
               >
                 <option value="">Elegir concejal…</option>
-                {seguidoresPorConcejales.map((c) => (
+                {seguidoresPorConcejales.map((c: { nombre: string }) => (
                   <option key={c.nombre} value={c.nombre}>{c.nombre}</option>
                 ))}
               </select>
@@ -541,7 +541,7 @@ export default function DashboardMaestroPage() {
                 className="w-full rounded-xl border-2 border-gray-200 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400/20 outline-none"
               >
                 <option value="">Elegir concejal…</option>
-                {seguidoresPorConcejales.map((c) => (
+                {seguidoresPorConcejales.map((c: { nombre: string }) => (
                   <option key={c.nombre} value={c.nombre}>{c.nombre}</option>
                 ))}
               </select>
