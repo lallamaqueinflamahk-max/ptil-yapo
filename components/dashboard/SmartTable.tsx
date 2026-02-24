@@ -46,7 +46,7 @@ export interface SmartTableProps<T> {
   /** Título o descripción corta */
   title?: string;
   /** Orden inicial por impacto: columna por defecto (ej. "estado" o "cantidadValidados") */
-  defaultSortKey?: keyof T | string;
+  defaultSortKey?: keyof T | string | null;
   /** Dirección del orden por defecto: desc = críticos primero / mayor primero */
   defaultSortDir?: "asc" | "desc";
   /** Para columnas con orden semántico (ej. estado): red < yellow < green. getSortValue(row, sortKey) retorna número o string. */
