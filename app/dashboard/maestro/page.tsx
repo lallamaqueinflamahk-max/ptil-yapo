@@ -17,7 +17,7 @@ import { useDashboardCharts } from "@/context/DashboardChartContext";
 import LineChartDynamic from "@/components/charts/LineChartDynamic";
 import BarChartRanking from "@/components/charts/BarChartRanking";
 import DonutChartStates from "@/components/charts/DonutChartStates";
-import TableWithSparklines from "@/components/charts/TableWithSparklines";
+import TableWithSparklines, { type TableWithSparklinesColumn } from "@/components/charts/TableWithSparklines";
 import EmbudoIdoneidad from "@/components/charts/EmbudoIdoneidad";
 import type { HeatmapPoint, LegendItem } from "@/components/MapaCalorAsuncion";
 import type { SeccionalRow } from "@/components/dashboard/ControlSeccionales";
@@ -34,6 +34,7 @@ import {
   buildSeccionalesParaMapaAvanzado,
   buildDonutLealesData,
   buildTablaSeccionalesConSpark,
+  type TablaSeccionalConSpark,
 } from "./maestroData";
 
 const MapaInteractivoAvanzado = dynamic(
@@ -325,12 +326,12 @@ export default function DashboardMaestroPage() {
     return 2;
   };
 
-  const tablaSparkColumns = [
+  const tablaSparkColumns: TableWithSparklinesColumn<TablaSeccionalConSpark>[] = [
     {
       key: "estado",
       label: "Estado",
       sortable: true,
-      render: (row: { estado?: string; estadoLabel?: string }) => {
+      render: (row) => {
         const e = row.estado ?? "green";
         const label = row.estadoLabel ?? (e === "green" ? "OK" : e === "yellow" ? "Atención" : "Crítico");
         const chipClass =
@@ -353,8 +354,7 @@ export default function DashboardMaestroPage() {
       label: "Validados",
       sortable: true,
       numeric: true,
-      render: (row: { cantidadValidados?: number }) =>
-        (row.cantidadValidados ?? 0).toLocaleString("es-PY"),
+      render: (row) => (row.cantidadValidados ?? 0).toLocaleString("es-PY"),
     },
   ];
 
