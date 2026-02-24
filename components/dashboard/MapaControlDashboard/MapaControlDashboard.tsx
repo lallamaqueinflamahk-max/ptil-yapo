@@ -53,7 +53,7 @@ export default function MapaControlDashboard({
   const mapRef = useRef<ReturnType<typeof import("leaflet").map> | null>(null);
   const layerGroupsRef = useRef<{ [key: string]: LeafletLayerGroup }>({});
   const seccionalesLayerRef = useRef<ReturnType<typeof import("leaflet").layerGroup> | null>(null);
-  const markersRef = useRef<ReturnType<typeof import("leaflet").Marker>[]>([]);
+  const markersRef = useRef<InstanceType<typeof import("leaflet").Marker>[]>([]);
 
   const selectedNumero =
     chartFilter?.type === "seccional" ? parseInt(chartFilter.value, 10) : null;
