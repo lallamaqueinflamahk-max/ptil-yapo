@@ -130,7 +130,11 @@ export default function DonutChartStates({
             </Pie>
             <Tooltip
               content={(props) => (
-                <DonutChartTooltip {...props} total={total} valueFormatter={(v) => v.toLocaleString("es-PY")} />
+                <DonutChartTooltip
+                  {...(props as Parameters<typeof DonutChartTooltip>[0])}
+                  total={total}
+                  valueFormatter={(v) => v.toLocaleString("es-PY")}
+                />
               )}
             />
             <Legend content={renderLegend} />
