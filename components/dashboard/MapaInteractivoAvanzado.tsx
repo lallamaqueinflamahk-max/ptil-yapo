@@ -78,7 +78,7 @@ export default function MapaInteractivoAvanzado({
   const mapRef = useRef<ReturnType<typeof import("leaflet").map> | null>(null);
   const layerGroupsRef = useRef<Record<string, ReturnType<typeof import("leaflet").layerGroup>>>({});
   const seccionalesLayerRef = useRef<ReturnType<typeof import("leaflet").layerGroup> | null>(null);
-  const markersRef = useRef<ReturnType<typeof import("leaflet").circleMarker | typeof import("leaflet").Marker>[]>([]);
+  const markersRef = useRef<(ReturnType<typeof import("leaflet").circleMarker> | InstanceType<typeof import("leaflet").Marker>)[]>([]);
   const onMapViewChangeRef = useRef(onMapViewChange);
   onMapViewChangeRef.current = onMapViewChange;
 
