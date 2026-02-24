@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type ComponentProps } from "react";
 import useSWR from "swr";
 import {
   LineChart,
@@ -74,25 +74,26 @@ export default function LineChartDynamic({
     });
   };
 
-  const renderLegend = (props: { payload?: { value: string; color: string }[] }) => {
+  const renderLegend = (props: { payload?: Array<{ value?: string; color?: string }> }) => {
     if (!props.payload) return null;
     return (
       <ul className="flex flex-wrap justify-center gap-4 mt-2">
         {props.payload.map((entry) => {
-          const dataKey = dataKeys.find((k) => k.name === entry.value)?.key ?? entry.value;
+          const value = entry.value ?? "";
+          const dataKey = dataKeys.find((k) => k.name === value)?.key ?? value;
           const key = `${chartId}:${dataKey}`;
           const hidden = hiddenLegendKeys.has(key);
           return (
             <li
-              key={entry.value}
+              key={value}
               onClick={() => toggleLegendKey(chartId, dataKey)}
               className="flex items-center gap-1.5 cursor-pointer select-none"
             >
               <span
                 className="inline-block w-3 h-3 rounded-full border border-gray-300"
-                style={{ backgroundColor: hidden ? "transparent" : entry.color }}
+                style={{ backgroundColor: hidden ? "transparent" : (entry.color ?? "#94A3B8") }}
               />
-              <span className={hidden ? "text-dash-muted line-through" : ""}>{entry.value}</span>
+              <span className={hidden ? "text-dash-muted line-through" : ""}>{value}</span>
             </li>
           );
         })}
@@ -142,7 +143,9 @@ export default function LineChartDynamic({
                 />
               )}
             />
-            <Legend content={renderLegend} />
+            <Legend
+              content={renderLegend as ComponentProps<typeof Legend>["content"]}
+            />
             {dataKeys.map(({ key, color, name }) => {
               if (hiddenLegendKeys.has(`${chartId}:${key}`)) return null;
               return (
