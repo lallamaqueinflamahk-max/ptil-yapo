@@ -4,7 +4,7 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import clsx from "clsx";
 import { Tooltip } from "./Tooltip";
 
-export type KPICardState = "normal" | "positive" | "warning" | "risk";
+export type KPICardState = "normal" | "positive" | "warning" | "risk" | "control";
 
 export interface KPICardVariation {
   /** Texto mostrado (ej. "+5%", "-2 pts") */
@@ -66,6 +66,12 @@ const STATE_STYLES: Record<
     border: "border-semantic-danger-border",
     value: "text-semantic-danger",
     ring: "stroke-semantic-danger",
+  },
+  control: {
+    bg: "bg-[#EFF6FF]",
+    border: "border-semantic-control",
+    value: "text-semantic-control",
+    ring: "stroke-semantic-control",
   },
 };
 
