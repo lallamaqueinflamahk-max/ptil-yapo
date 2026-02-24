@@ -19,10 +19,7 @@ export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,
   className?: string;
 }
 
-const variantStyles: Record<
-  ChipVariant,
-  { base: string; selected: string }
-> = {
+const variantStyles: Record<ChipVariant, string> = {
   control:
     "border-semantic-neutral-border text-sentinel-text-secondary bg-surface hover:border-semantic-control hover:text-semantic-control",
   success:
@@ -57,8 +54,8 @@ export function Chip({
     "inline-flex items-center gap-1.5 rounded-sentinel-full border px-3 py-1.5 text-xs font-semibold transition-all duration-dashboard focus-visible:outline focus-visible:ring-2 focus-visible:ring-semantic-control focus-visible:ring-offset-2 disabled:opacity-disabled";
 
   const style = selected
-    ? `${variantStyles[variant].base} ${selectedStyles[variant]}`
-    : variantStyles[variant].base;
+    ? `${variantStyles[variant]} ${selectedStyles[variant]}`
+    : variantStyles[variant];
 
   if (interactive) {
     return (
