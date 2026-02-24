@@ -134,7 +134,7 @@ export default function LineChartDynamic({
             <Tooltip
               content={(props) => (
                 <LineChartTooltip
-                  {...props}
+                  {...(props as Parameters<typeof LineChartTooltip>[0])}
                   labelFormatter={(_label, pl) =>
                     (pl as { fecha?: string })?.fecha ?? _label
                   }
