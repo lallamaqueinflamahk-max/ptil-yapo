@@ -990,7 +990,7 @@ export default function DashboardMaestroPage() {
           getSortValue={(row, key) => {
             if (key === "estado") return estadoSortValue((row as { estado?: string }).estado);
             if (key === "cantidadValidados") return (row as { cantidadValidados?: number }).cantidadValidados ?? 0;
-            return String((row as Record<string, unknown>)[key as string] ?? "");
+            return String((row as unknown as Record<string, unknown>)[key as string] ?? "");
           }}
           renderRowActions={(row) => {
             const r = row as { numero?: number; nombre?: string; contacto?: string | null };
