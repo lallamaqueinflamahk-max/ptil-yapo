@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import { MapPin, Users, TrendingUp, PieChart, BarChart3, Table2, X, GitCompare, AlertTriangle, BarChart2, MessageCircle, ClipboardList, ShieldCheck, GraduationCap } from "lucide-react";
@@ -214,7 +214,7 @@ function CoberturaTerritorioPuntos() {
   );
 }
 
-export default function DashboardMaestroPage() {
+function MaestroContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const filter = searchParams.get("filter") ?? undefined;
@@ -1058,5 +1058,19 @@ export default function DashboardMaestroPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function DashboardMaestroPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-yapo-gray flex items-center justify-center">
+          <p className="text-dash-muted">Cargando...</p>
+        </div>
+      }
+    >
+      <MaestroContent />
+    </Suspense>
   );
 }
