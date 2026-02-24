@@ -20,7 +20,7 @@ export interface TableWithSparklinesColumn<T> {
   numeric?: boolean;
 }
 
-export interface TableWithSparklinesProps<T extends Record<string, unknown>> {
+export interface TableWithSparklinesProps<T extends object> {
   data: T[];
   columns: TableWithSparklinesColumn<T>[];
   /** Key del campo en cada row que es un array de números o SparklinePoint[] para el sparkline */
@@ -53,7 +53,7 @@ function getSparklineValues(row: Record<string, unknown>, key: string): Sparklin
   return [];
 }
 
-export default function TableWithSparklines<T extends Record<string, unknown>>({
+export default function TableWithSparklines<T extends object>({
   data,
   columns,
   sparklineKey,
