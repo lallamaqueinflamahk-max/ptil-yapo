@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Search, ArrowLeft, History } from "lucide-react";
 
 const STORAGE_KEY_ULTIMO_CODIGO = "ptil_ultimo_codigo_verificar";
 
-export default function VerificarPage() {
+function VerificarContent() {
   const searchParams = useSearchParams();
   const [codigo, setCodigo] = useState("");
   const [ultimoCodigo, setUltimoCodigo] = useState<string | null>(null);
@@ -103,7 +103,7 @@ export default function VerificarPage() {
           />
           <button
             type="button"
-            onClick={consultar}
+            onClick={() => consultar()}
             disabled={loading || !codigo.trim()}
             className="btn-yapo btn-yapo-primary shrink-0 disabled:opacity-50 min-h-[48px]"
           >
@@ -201,5 +201,17 @@ export default function VerificarPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function VerificarPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-yapo-gray flex items-center justify-center">
+        <p className="text-gray-600">Cargando…</p>
+      </div>
+    }>
+      <VerificarContent />
+    </Suspense>
   );
 }

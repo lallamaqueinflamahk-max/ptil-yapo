@@ -175,6 +175,21 @@ export default function DashboardOperadorPage() {
     if (operadorProfile?.whatsapp) setWhatsappOperador(operadorProfile.whatsapp ?? "");
   }, [operadorProfile?.nombreCompleto, operadorProfile?.whatsapp]);
 
+  const alertasUrl = perfilGuardado && cedula ? `/api/operador/alertas?cedula=${encodeURIComponent(cedula)}` : null;
+  const misValidacionesUrl = perfilGuardado && cedula ? `/api/operador/mis-validaciones?cedulaOperador=${encodeURIComponent(cedula)}` : null;
+  const statsUrl = perfilGuardado && cedula ? `/api/operador/stats?cedula=${encodeURIComponent(cedula)}` : null;
+
+  const { data: alertasData, mutate: mutateAlertas } = useSWR<{ alertas: AlertaItem[]; total: number }>(alertasUrl, fetcher, { refreshInterval: 15000 });
+  const { data: statsData } = useSWR<{ totalValidados: number; validadosEsteMes: number; pendientesDictamen: number }>(statsUrl, fetcher, { refreshInterval: 20000 });
+  const { data: validacionesData, mutate: mutateValidaciones } = useSWR<{
+    validaciones: ValidacionItem[];
+    pendientes: ValidacionItem[];
+    conDictamen: ValidacionItem[];
+    total: number;
+  }>(misValidacionesUrl, fetcher, { refreshInterval: 10000 });
+
+  const alertasZona = alertasData?.alertas ?? [];
+
   // Countdown para tomar orden (5 min desde createdAt de cada alerta)
   useEffect(() => {
     if (alertasZona.length === 0) {
@@ -196,21 +211,6 @@ export default function DashboardOperadorPage() {
     const t = setInterval(update, 1000);
     return () => clearInterval(t);
   }, [alertasZona.length, alertasZona.map((a) => a.id + (a.createdAt ?? "")).join(",")]);
-
-  const alertasUrl = perfilGuardado && cedula ? `/api/operador/alertas?cedula=${encodeURIComponent(cedula)}` : null;
-  const misValidacionesUrl = perfilGuardado && cedula ? `/api/operador/mis-validaciones?cedulaOperador=${encodeURIComponent(cedula)}` : null;
-  const statsUrl = perfilGuardado && cedula ? `/api/operador/stats?cedula=${encodeURIComponent(cedula)}` : null;
-
-  const { data: alertasData, mutate: mutateAlertas } = useSWR<{ alertas: AlertaItem[]; total: number }>(alertasUrl, fetcher, { refreshInterval: 15000 });
-  const { data: statsData } = useSWR<{ totalValidados: number; validadosEsteMes: number; pendientesDictamen: number }>(statsUrl, fetcher, { refreshInterval: 20000 });
-  const { data: validacionesData, mutate: mutateValidaciones } = useSWR<{
-    validaciones: ValidacionItem[];
-    pendientes: ValidacionItem[];
-    conDictamen: ValidacionItem[];
-    total: number;
-  }>(misValidacionesUrl, fetcher, { refreshInterval: 10000 });
-
-  const alertasZona = alertasData?.alertas ?? [];
   const validaciones = validacionesData?.validaciones ?? [];
   const pendientes = validacionesData?.pendientes ?? validaciones.filter((v) => v.estado === "pendiente");
   const aprobados = validaciones.filter((v) => v.estado === "aprobado" || v.estado === "aprobado_observacion");
