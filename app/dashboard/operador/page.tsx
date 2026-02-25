@@ -719,15 +719,18 @@ export default function DashboardOperadorPage() {
               <p className="text-sm text-gray-600">Registrar trabajador in situ</p>
             </div>
           </Link>
-          <div className="bg-white rounded-2xl p-6 shadow-md flex items-center gap-4 border-2 border-amber-200/60">
-            <div className="w-14 h-14 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+          <Link
+            href="/?operador=1"
+            className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg flex items-center gap-4 border-2 border-transparent hover:border-amber-400/60 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] group"
+          >
+            <div className="w-14 h-14 rounded-xl bg-amber-500/10 group-hover:bg-amber-500/20 flex items-center justify-center transition-colors shrink-0">
               <Camera className="w-8 h-8 text-amber-600" />
             </div>
             <div className="min-w-0">
-              <h2 className="font-semibold text-yapo-blue">Evidencia visual</h2>
-              <p className="text-sm text-gray-600">Foto con herramientas o marcar Falta equipamiento</p>
+              <h2 className="font-semibold text-yapo-blue">Sacar foto y cargar suscriptor</h2>
+              <p className="text-sm text-gray-600">Usá la cámara de tu celular para sacar la foto del trabajador y completá sus datos para inscribirlo.</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {perfilGuardado && (
