@@ -453,7 +453,7 @@ function MaestroContent() {
       <div className="rounded-2xl border-2 border-yapo-blue/20 bg-gradient-to-r from-slate-50 to-blue-50/50 p-4 sm:p-5 shadow-lg">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 sm:gap-6">
-            <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Estado del territorio</span>
+            <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Estado del territorio</span>
             <span className="inline-flex items-center gap-1.5 text-sm">
               <span className="h-3 w-3 rounded-full bg-red-500" aria-hidden />
               <strong className="text-red-700">{countRed}</strong> crítico{countRed !== 1 ? "s" : ""}
@@ -471,7 +471,7 @@ function MaestroContent() {
             <button
               type="button"
               onClick={() => { setSoloRiesgo(true); scrollToMapa(); }}
-              className="btn-yapo btn-yapo-primary min-h-[44px] px-5 text-base"
+              className="btn-yapo btn-yapo-primary min-h-[48px] px-5 text-base"
             >
               Ver {countRed + countYellow} en riesgo en el mapa
             </button>
@@ -837,7 +837,7 @@ function MaestroContent() {
           </h2>
           <AyudaHerramienta {...AYUDA_MAPA_INTERACTIVO} />
         </div>
-        <p className="text-sm text-gray-500 mb-3">
+        <p className="text-sm text-gray-600 mb-3">
           Activá/desactivá capas (Leales, Riesgo, Capacitación, Dirigentes, Verificación). Para ver <strong>solo seccionales en riesgo o con alertas</strong>, usá el filtro Estado (Crítico / Atención) en la esquina del mapa o el botón «Ver solo seccionales en riesgo» arriba. Clic en una seccional abre el panel con KPIs y contacto; el mapa controla filtros y vista.
         </p>
         {seccionalesEnVista != null && (
@@ -876,7 +876,7 @@ function MaestroContent() {
             </h2>
             <AyudaHerramienta {...AYUDA_MAPA_MULTICAPA} />
           </div>
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-gray-600 mb-3">
             Usá el control de capas (arriba a la derecha) para activar/desactivar Calor por seccionales y Puntos seccionales.
           </p>
           <p className="text-xs text-gray-600 mb-2 font-medium">
@@ -904,7 +904,7 @@ function MaestroContent() {
             </h2>
             <AyudaHerramienta {...AYUDA_MAPA_ESTADO} />
           </div>
-          <p className="text-sm text-gray-500 mb-3">
+          <p className="text-sm text-gray-600 mb-3">
             Activá las capas (Leales, No verificados, Riesgo, Capacitación, Dirigentes) y hacé clic en cada punto para ver la información completa del suscriptor o dirigente.
           </p>
           <MapaCapasSuscriptores capas={capasMapa} />

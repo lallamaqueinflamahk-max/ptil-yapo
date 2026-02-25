@@ -115,7 +115,7 @@ export default function DashboardControlRoomPage() {
       <div className="rounded-2xl border-2 border-gray-200/90 bg-white p-4 sm:p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 sm:gap-6">
-            <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Estado del territorio</span>
+            <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Estado del territorio</span>
             <span className="inline-flex items-center gap-1.5 text-sm">
               <span className="h-3 w-3 rounded-full bg-red-500" aria-hidden />
               <strong className="text-red-700">{estadoTerritorio.countRed}</strong> crítico{estadoTerritorio.countRed !== 1 ? "s" : ""}
@@ -131,7 +131,7 @@ export default function DashboardControlRoomPage() {
           </div>
           <Link
             href={estadoTerritorio.countRiesgo > 0 ? "/dashboard/maestro?filter=riesgo" : "/dashboard/maestro"}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#1E40AF] transition-colors"
+            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#1E40AF] transition-colors"
           >
             Ver en Territorio
             <ChevronRight className="w-4 h-4" aria-hidden />
@@ -140,7 +140,7 @@ export default function DashboardControlRoomPage() {
       </div>
 
       <section aria-label={home.sections.kpis}>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">
           {home.sections.kpis}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -169,7 +169,7 @@ export default function DashboardControlRoomPage() {
       </section>
 
       <section aria-label={home.sections.main}>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">
           {home.sections.main}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -209,7 +209,7 @@ export default function DashboardControlRoomPage() {
       </section>
 
       <section aria-label={home.sections.idoneidad}>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">
           {home.sections.idoneidad}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -242,7 +242,7 @@ export default function DashboardControlRoomPage() {
 
       {/* Módulos del producto — cada uno justifica su existencia */}
       <section aria-label={home.sections.quickAccess}>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">
           {home.sections.quickAccess}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -254,8 +254,8 @@ export default function DashboardControlRoomPage() {
                 </span>
                 <div>
                   <p className="font-semibold text-gray-900">{QUICK_ACCESS.maestro.title}</p>
-                  <p className="text-xs text-gray-600">{QUICK_ACCESS.maestro.description}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{QUICK_ACCESS.maestro.value}</p>
+                  <p className="text-xs text-gray-700">{QUICK_ACCESS.maestro.description}</p>
+                  <p className="text-xs text-gray-600 mt-0.5">{QUICK_ACCESS.maestro.value}</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
@@ -270,8 +270,8 @@ export default function DashboardControlRoomPage() {
                 </span>
                 <div>
                   <p className="font-semibold text-gray-900">{QUICK_ACCESS.pro.title}</p>
-                  <p className="text-xs text-gray-600">{QUICK_ACCESS.pro.description}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{QUICK_ACCESS.pro.value}</p>
+                  <p className="text-xs text-gray-700">{QUICK_ACCESS.pro.description}</p>
+                  <p className="text-xs text-gray-600 mt-0.5">{QUICK_ACCESS.pro.value}</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
@@ -286,8 +286,8 @@ export default function DashboardControlRoomPage() {
                 </span>
                 <div>
                   <p className="font-semibold text-gray-900">{QUICK_ACCESS.operador.title}</p>
-                  <p className="text-xs text-gray-600">{QUICK_ACCESS.operador.description}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{QUICK_ACCESS.operador.value}</p>
+                  <p className="text-xs text-gray-700">{QUICK_ACCESS.operador.description}</p>
+                  <p className="text-xs text-gray-600 mt-0.5">{QUICK_ACCESS.operador.value}</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
@@ -302,8 +302,8 @@ export default function DashboardControlRoomPage() {
                 </span>
                 <div>
                   <p className="font-semibold text-gray-900">{QUICK_ACCESS.capacitacion.title}</p>
-                  <p className="text-xs text-gray-600">{QUICK_ACCESS.capacitacion.description}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{QUICK_ACCESS.capacitacion.value}</p>
+                  <p className="text-xs text-gray-700">{QUICK_ACCESS.capacitacion.description}</p>
+                  <p className="text-xs text-gray-600 mt-0.5">{QUICK_ACCESS.capacitacion.value}</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
@@ -317,17 +317,17 @@ export default function DashboardControlRoomPage() {
         <button
           type="button"
           onClick={() => setOfertaExpandida(!ofertaExpandida)}
-          className="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] focus-visible:ring-offset-2 rounded-lg"
+          className="w-full flex items-center justify-center gap-2 py-2 text-xs font-medium text-gray-600 hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] focus-visible:ring-offset-2 rounded-lg"
         >
           {PRODUCT.name} — para quién es
           {ofertaExpandida ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
         {ofertaExpandida && (
           <div className="mt-3 space-y-2 max-w-2xl mx-auto text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-600">
               {PRODUCT.name} está diseñado para {PRODUCT.audience}. Cada módulo responde a un rol y a una necesidad estratégica.
             </p>
-            <ul className="text-xs text-gray-500 list-disc list-inside text-left inline-block space-y-1">
+            <ul className="text-xs text-gray-600 list-disc list-inside text-left inline-block space-y-1">
               {OFERTA_VALOR.map((item, i) => (
                 <li key={i}>{item}</li>
               ))}
@@ -351,7 +351,7 @@ export default function DashboardControlRoomPage() {
             </div>
             <Link
               href="/dashboard/capacitacion"
-              className="ml-auto btn-yapo min-h-[40px] px-4 text-sm bg-dash-yellow text-white hover:bg-dash-yellow/90 rounded-xl font-medium transition-all duration-dashboard shrink-0"
+              className="ml-auto btn-yapo min-h-[48px] px-4 text-sm bg-dash-yellow text-white hover:bg-dash-yellow/90 rounded-xl font-medium transition-all duration-dashboard shrink-0"
             >
               Ir a capacitación
             </Link>

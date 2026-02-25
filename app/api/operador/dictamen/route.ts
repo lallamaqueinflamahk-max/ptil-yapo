@@ -18,6 +18,9 @@ export async function PATCH(request: NextRequest) {
     const cedulaOperador = body.cedulaOperador?.trim();
     const dictamen = body.dictamen?.trim().toUpperCase();
     const evidenciaFaltaEquipo = body.evidenciaFaltaEquipo === true;
+    const lugarValidacion = ["IN_SITU", "LUGAR_TRABAJO", "CASA"].includes(String(body.lugarValidacion ?? "").toUpperCase())
+      ? (String(body.lugarValidacion).toUpperCase() as "IN_SITU" | "LUGAR_TRABAJO" | "CASA")
+      : null;
 
     if (!fichaId || !cedulaOperador || !dictamen) {
       return NextResponse.json(
@@ -61,11 +64,13 @@ export async function PATCH(request: NextRequest) {
       dictamenOperador: string;
       dictamenAt: Date;
       evidenciaFaltaEquipo: boolean;
+      lugarValidacion: string | null;
       estadoVerificacion?: string;
     } = {
       dictamenOperador: dictamen,
       dictamenAt: ahora,
       evidenciaFaltaEquipo,
+      lugarValidacion,
     };
 
     if (dictamen === "APROBADO" || dictamen === "APROBADO_OBSERVACION") {

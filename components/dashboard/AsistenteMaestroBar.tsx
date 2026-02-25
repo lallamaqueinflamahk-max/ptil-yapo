@@ -33,6 +33,7 @@ interface SpeechRecognitionInstance extends EventTarget {
 }
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
+  resultIndex: number;
 }
 
 interface AsistenteMaestroBarProps {
@@ -274,7 +275,7 @@ export default function AsistenteMaestroBar({ inNavbar = false }: AsistenteMaest
                       }}
                       placeholder="Escribí o hablá tu pregunta..."
                       rows={1}
-                      className="flex-1 min-h-[44px] max-h-24 rounded-xl border-2 border-slate-200/90 px-4 py-2.5 text-sm resize-none focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 bg-white/90 backdrop-blur-sm placeholder:text-slate-400"
+                      className="flex-1 min-h-[48px] max-h-24 rounded-xl border-2 border-slate-200/90 px-4 py-2.5 text-sm resize-none focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 bg-white/90 backdrop-blur-sm placeholder:text-slate-400"
                       disabled={loading}
                     />
                     <button

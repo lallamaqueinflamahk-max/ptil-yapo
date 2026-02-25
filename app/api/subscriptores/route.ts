@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { crearFicha } from "@/lib/db/crearFicha";
 import type { FormDataLike, GpsCoords } from "@/lib/utils/buildSubscriptor";
 
-type Body = FormDataLike & { gpsCoords: { lat: number; lng: number } | null };
+type GpsPair = { lat: number; lng: number };
+type Body = FormDataLike & {
+  gpsCoords: GpsPair | null;
+  gpsCasa?: GpsPair | null;
+  gpsLaburo?: GpsPair | null;
+};
 
 export async function POST(request: NextRequest) {
   // #region agent log
@@ -37,6 +42,8 @@ export async function POST(request: NextRequest) {
       seccionalNro,
       cedulaOperador,
       gpsCoords,
+      gpsCasa,
+      gpsLaburo,
     } = body;
 
     if (!nombreCompleto?.trim() || !cedula?.trim() || !whatsapp?.trim() || !oficioPrincipal?.trim()) {
@@ -49,6 +56,14 @@ export async function POST(request: NextRequest) {
     const gps: GpsCoords | null =
       gpsCoords && typeof gpsCoords.lat === "number" && typeof gpsCoords.lng === "number"
         ? { lat: gpsCoords.lat, lng: gpsCoords.lng }
+        : null;
+    const gpsCasaNorm: GpsCoords | null =
+      gpsCasa && typeof gpsCasa.lat === "number" && typeof gpsCasa.lng === "number"
+        ? { lat: gpsCasa.lat, lng: gpsCasa.lng }
+        : null;
+    const gpsLaburoNorm: GpsCoords | null =
+      gpsLaburo && typeof gpsLaburo.lat === "number" && typeof gpsLaburo.lng === "number"
+        ? { lat: gpsLaburo.lat, lng: gpsLaburo.lng }
         : null;
 
     // #region agent log
@@ -76,6 +91,8 @@ export async function POST(request: NextRequest) {
       seccionalNro: seccionalNro ?? "",
       cedulaOperador: cedulaOperador ?? "",
       gpsCoords: gps,
+      gpsCasa: gpsCasaNorm,
+      gpsLaburo: gpsLaburoNorm,
     });
 
     // #region agent log

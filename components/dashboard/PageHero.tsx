@@ -39,9 +39,9 @@ export default function PageHero({
           <p className="text-sm text-gray-600 mt-0.5 max-w-2xl">
             {subtitle}
           </p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-600">
             {trust && (
-              <span className="font-medium text-gray-600">{trust}</span>
+              <span className="font-medium text-gray-700">{trust}</span>
             )}
             {scope && (
               <span>{scope}</span>
@@ -51,7 +51,7 @@ export default function PageHero({
             )}
           </div>
           {forWho && (
-            <p className="text-xs text-gray-500 mt-2 italic">
+            <p className="text-xs text-gray-600 mt-2 italic">
               Para: {forWho}
             </p>
           )}

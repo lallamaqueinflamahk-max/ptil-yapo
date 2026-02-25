@@ -50,7 +50,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={loading}
         aria-disabled={isDisabled}
         className={clsx(
-          "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sentinel-lg px-4 py-2 text-sm font-semibold transition-all duration-dashboard ease-sentinel-out",
+          "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-sentinel-lg px-4 py-2 text-sm font-semibold transition-all duration-dashboard ease-sentinel-out",
           "hover:scale-[1.02] active:scale-[0.98]",
           variantStyles[variant],
           fullWidth && "w-full",

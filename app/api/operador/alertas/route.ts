@@ -30,11 +30,14 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         nombreCompleto: true,
+        cedulaNro: true,
         oficioPrincipal: true,
         whatsapp: true,
+        email: true,
         createdAt: true,
         seccionalNro: true,
         gestorZona: true,
+        cargoGestor: true,
         gpsLat: true,
         gpsLng: true,
       },
@@ -43,13 +46,18 @@ export async function GET(request: NextRequest) {
     const listado = fichas.map((f) => ({
       id: f.id,
       nombreTrabajador: f.nombreCompleto,
+      cedulaNro: f.cedulaNro,
       oficio: f.oficioPrincipal,
       whatsapp: f.whatsapp,
+      email: f.email ?? null,
       fechaRegistro: formatFechaRelativa(f.createdAt),
+      createdAt: f.createdAt.toISOString(),
       seccionalNro: f.seccionalNro,
       gestorZona: f.gestorZona,
+      cargoGestor: f.cargoGestor ?? null,
       gpsLat: f.gpsLat,
       gpsLng: f.gpsLng,
+      gpsVerificado: f.gpsLat != null && f.gpsLng != null,
     }));
 
     return NextResponse.json({ alertas: listado, total: listado.length });

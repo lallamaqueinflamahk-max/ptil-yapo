@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
           ? "Tu ficha fue verificada."
           : "Tu ficha ya fue traspasada a YAPÓ.";
 
-    return NextResponse.json({
+    const payload: Record<string, unknown> = {
       ok: true,
       codigoVerificacion: ficha.codigoVerificacion,
       estadoVerificacion: ficha.estadoVerificacion,
@@ -59,7 +59,19 @@ export async function GET(request: NextRequest) {
       grupo: ficha.clasificacionAutomatica,
       tieneCertificacion,
       derivadoACapacitacion,
-    });
+    };
+    // Para carnet de trabajador YAPÓ certificado (solo si está VERIFICADO)
+    if (ficha.estadoVerificacion === "VERIFICADO") {
+      payload.carnet = {
+        nombreCompleto: ficha.nombreCompleto,
+        cedulaNro: ficha.cedulaNro,
+        oficioPrincipal: ficha.oficioPrincipal,
+        selfieDataUrl: ficha.selfieDataUrl,
+        codigoVerificacion: ficha.codigoVerificacion,
+        fechaInscripcion: ficha.createdAt.toISOString().slice(0, 10),
+      };
+    }
+    return NextResponse.json(payload);
   } catch (e) {
     console.error("Error al verificar código:", e);
     return NextResponse.json(

@@ -43,8 +43,12 @@ model Ficha {
   situacion         String // Desempleado | Contratado | Independiente
   seguroSocial      Boolean @default(false)
   selfieDataUrl     String? // Base64 o URL cuando haya almacenamiento externo
-  gpsLat            Float?
+  gpsLat            Float?  // Ubicación al momento del registro
   gpsLng            Float?
+  gpsCasaLat        Float?  // GPS de casa del suscriptor
+  gpsCasaLng        Float?
+  gpsLaburoLat      Float?  // GPS del lugar de trabajo
+  gpsLaburoLng      Float?
 
   // Respaldo confianza
   promotorYapo     String
@@ -61,6 +65,7 @@ model Ficha {
   dictamenOperador     String?   // APROBADO | APROBADO_OBSERVACION | RECHAZADO | DERIVAR_CAPACITACION
   dictamenAt           DateTime?
   evidenciaFaltaEquipo Boolean?  // true = marcó "Falta de Equipamiento/equipamientos ajenos"
+  lugarValidacion      String?   // IN_SITU | LUGAR_TRABAJO | CASA (dónde se realizó la validación)
 
   // Clasificación automática (Grupo A/B/C)
   clasificacionAutomatica String

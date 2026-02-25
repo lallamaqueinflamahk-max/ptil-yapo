@@ -37,7 +37,7 @@ export function FilterButton({
       aria-pressed={active}
       aria-label={ariaLabel ?? label}
       className={`
-        inline-flex items-center gap-2 min-h-[44px] px-4 rounded-xl font-semibold text-sm
+        inline-flex items-center gap-2 min-h-[48px] px-4 rounded-xl font-semibold text-sm
         transition-all duration-300 select-none
         focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
         hover:scale-[1.03] active:scale-[0.98]
@@ -115,7 +115,7 @@ export function ActionButton({
       aria-label={ariaLabel ?? label}
       aria-busy={state === "loading"}
       className={`
-        inline-flex items-center justify-center gap-2 min-h-[44px] px-4 rounded-xl font-semibold text-sm
+        inline-flex items-center justify-center gap-2 min-h-[48px] px-4 rounded-xl font-semibold text-sm
         border transition-all duration-300 select-none
         hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100
         focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -31,6 +32,46 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Table2,
 };
 
+const SEGMENT_LABELS: Record<string, string> = {
+  operador: "Operador",
+  maestro: "Territorio",
+  mapa: "Mapa",
+  pro: "Pro",
+  capacitacion: "Capacitación",
+  idoneidad: "Idoneidad",
+  config: "Configuración",
+};
+
+function DashboardBreadcrumb({ pathname }: { pathname: string }) {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length <= 1) return null;
+  const items: { href: string; label: string }[] = [{ href: "/dashboard", label: "Dashboard" }];
+  let acc = "/dashboard";
+  for (let i = 1; i < segments.length; i++) {
+    acc += `/${segments[i]}`;
+    items.push({
+      href: acc,
+      label: SEGMENT_LABELS[segments[i]] ?? segments[i].charAt(0).toUpperCase() + segments[i].slice(1),
+    });
+  }
+  return (
+    <nav aria-label="Miga de pan" className="flex items-center gap-2 text-sm text-gray-700 mb-4">
+      {items.map((item, i) => (
+        <span key={item.href} className="flex items-center gap-2">
+          {i > 0 && <span aria-hidden className="text-gray-500">/</span>}
+          {i === items.length - 1 ? (
+            <span className="font-medium text-gray-900">{item.label}</span>
+          ) : (
+            <Link href={item.href} className="hover:text-yapo-blue hover:underline">
+              {item.label}
+            </Link>
+          )}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
 function navFilter(href: string, role: StaffRole): boolean {
   if ((MAESTRO_ONLY_PATHS as readonly string[]).includes(href)) return canAccessMaestroUi(role);
   return true;
@@ -57,15 +98,20 @@ export default function DashboardLayout({
           <div className="flex items-center justify-between h-14">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 text-gray-900 font-semibold hover:text-[#1E3A8A] transition-colors"
+              className="flex items-center gap-3 text-gray-900 font-semibold hover:opacity-90 transition-opacity"
             >
-              <LayoutDashboard className="w-5 h-5 text-[#1E3A8A]" aria-hidden />
-              <span className="hidden sm:inline">{PRODUCT.name}</span>
-              <span className="sm:hidden">{PRODUCT.shortName}</span>
+              <Image
+                src="/logo-yapo-oficial.png"
+                alt="YAPÓ"
+                width={52}
+                height={52}
+                className="object-contain shrink-0"
+              />
+              <span className="hidden sm:inline text-[#1E3A8A]">Panel de administrador</span>
             </Link>
             <div className="hidden lg:flex flex-col items-end text-right">
-              <p className="text-xs text-gray-600 font-medium">{PRODUCT.tagline}</p>
-              <p className="text-[10px] text-gray-400 tracking-wide">{PRODUCT.byline}</p>
+              <p className="text-xs text-gray-700 font-medium">{PRODUCT.tagline}</p>
+              <p className="text-xs text-gray-600 tracking-wide">{PRODUCT.byline}</p>
             </div>
             <nav className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-hide max-w-full">
               {navItems.map(({ href, label, shortLabel, icon: iconKey }) => {
@@ -111,7 +157,7 @@ export default function DashboardLayout({
               })}
               <Link
                 href="/"
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-500 hover:bg-gray-100 hover:text-[#1E3A8A] transition-all ml-2"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-100 hover:text-[#1E3A8A] transition-all ml-2"
               >
                 <Home className="w-4 h-4" aria-hidden />
                 <span className="hidden sm:inline">Inicio</span>
@@ -123,6 +169,7 @@ export default function DashboardLayout({
         </div>
       </header>
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <DashboardBreadcrumb pathname={pathname} />
         <DashboardChartProvider>{children}</DashboardChartProvider>
       </main>
     </div>

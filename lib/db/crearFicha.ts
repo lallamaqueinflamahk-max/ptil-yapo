@@ -11,6 +11,8 @@ export type EstadoVerificacion = "PENDIENTE" | "VERIFICADO" | "TRASPASADO";
 
 export interface CrearFichaInput extends FormDataLike {
   gpsCoords: GpsCoords | null;
+  gpsCasa?: GpsCoords | null;
+  gpsLaburo?: GpsCoords | null;
 }
 
 export async function crearFicha(data: CrearFichaInput): Promise<{
@@ -26,11 +28,14 @@ export async function crearFicha(data: CrearFichaInput): Promise<{
   const cedulaNumero = parseInt(data.cedula.replace(/\D/g, ""), 10) || 0;
   const codigos = generarCodigosFicha();
 
+  // Si tiene certificación (Grupo A) y cumple parámetros, validación automática sin Operador YAPÓ.
+  const estadoInicial = grupo === "A" ? "VERIFICADO" : "PENDIENTE";
+
   const ficha = await prisma.ficha.create({
     data: {
       codigoSeguridad: codigos.codigoSeguridad,
       codigoVerificacion: codigos.codigoVerificacion,
-      estadoVerificacion: "PENDIENTE",
+      estadoVerificacion: estadoInicial,
       nombreCompleto: data.nombreCompleto.trim(),
       cedulaNro: data.cedula.trim(),
       cedulaNumero,
@@ -47,6 +52,10 @@ export async function crearFicha(data: CrearFichaInput): Promise<{
       selfieDataUrl: data.selfieDataUrl ?? null,
       gpsLat: data.gpsCoords?.lat ?? null,
       gpsLng: data.gpsCoords?.lng ?? null,
+      gpsCasaLat: data.gpsCasa?.lat ?? null,
+      gpsCasaLng: data.gpsCasa?.lng ?? null,
+      gpsLaburoLat: data.gpsLaburo?.lat ?? null,
+      gpsLaburoLng: data.gpsLaburo?.lng ?? null,
       promotorYapo: data.promotor?.trim() || "Miguel Sosa",
       gestorZona: data.gestorZona.trim(),
       cargoGestor: data.cargoGestor.trim(),

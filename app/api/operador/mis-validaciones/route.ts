@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
         asignadoAt: true,
         gpsLat: true,
         gpsLng: true,
+        lugarValidacion: true,
       },
     });
 
@@ -47,6 +48,7 @@ export async function GET(request: NextRequest) {
       whatsapp: f.whatsapp,
       gpsLat: f.gpsLat,
       gpsLng: f.gpsLng,
+      lugarValidacion: f.lugarValidacion ?? null,
       estado: f.dictamenOperador
         ? (f.dictamenOperador.toLowerCase() as "aprobado" | "aprobado_observacion" | "rechazado" | "derivar_capacitacion")
         : "pendiente",

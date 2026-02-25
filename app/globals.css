@@ -46,6 +46,11 @@ body {
   @apply block text-sm font-medium text-gray-700 mb-1;
 }
 
+/* Texto secundario con contraste WCAG AA (≥4.5:1 sobre fondo claro) */
+.text-readable-muted {
+  @apply text-gray-600;
+}
+
 /* Dashboard: ocultar scrollbar en nav horizontal manteniendo scroll */
 .scrollbar-hide {
   -ms-overflow-style: none;

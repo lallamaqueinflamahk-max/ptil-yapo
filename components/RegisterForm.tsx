@@ -11,6 +11,10 @@ import {
   ScanLine,
   CheckCircle2,
   Sparkles,
+  Home,
+  Briefcase,
+  Info,
+  Search,
 } from "lucide-react";
 import clsx from "clsx";
 import { useToast } from "@/hooks/useToast";
@@ -19,6 +23,7 @@ import { getGrupoPreclasificacion } from "@/lib/utils/preclasificacion";
 import { buildSubscriptor } from "@/lib/utils/buildSubscriptor";
 import { getMasterKey, FAKE_FORM_DATA, FAKE_GPS } from "@/lib/utils/masterKey";
 import GuiaOperador from "@/components/GuiaOperador";
+import Link from "next/link";
 import {
   tipificarOficioIA as tipificarOficioIAClient,
   type TipificacionOficioResult,
@@ -87,6 +92,8 @@ export default function RegisterForm({
   const [data, setData] = useState<FormData>(defaultData);
   const [gpsChecked, setGpsChecked] = useState(false);
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [gpsCasaCoords, setGpsCasaCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [gpsLaburoCoords, setGpsLaburoCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [tipificacionIA, setTipificacionIA] = useState<TipificacionOficioResult | null>(null);
   const [tipificacionLoading, setTipificacionLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -100,6 +107,8 @@ export default function RegisterForm({
     if (masterKey) {
       setData({ ...FAKE_FORM_DATA });
       setGpsCoords(FAKE_GPS);
+      setGpsCasaCoords(FAKE_GPS);
+      setGpsLaburoCoords(FAKE_GPS);
     }
   }, [masterKey]);
 
@@ -122,7 +131,9 @@ export default function RegisterForm({
     const hasOficio = data.oficioPrincipal.trim() !== "";
     const hasSelfie = !!data.selfieDataUrl;
     const gpsOk = data.gpsActivo;
-    return hasOficio && hasSelfie && gpsOk;
+    const hasGpsCasa = gpsCasaCoords != null;
+    const hasGpsLaburo = gpsLaburoCoords != null;
+    return hasOficio && hasSelfie && gpsOk && hasGpsCasa && hasGpsLaburo;
   };
 
   const validateStep3 = () => {
@@ -186,6 +197,32 @@ export default function RegisterForm({
     }
   };
 
+  const captureGpsCasa = () => {
+    if (masterKey) {
+      setGpsCasaCoords(FAKE_GPS);
+      return;
+    }
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setGpsCasaCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => error("No se pudo obtener la ubicación de tu casa.")
+      );
+    }
+  };
+
+  const captureGpsLaburo = () => {
+    if (masterKey) {
+      setGpsLaburoCoords(FAKE_GPS);
+      return;
+    }
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setGpsLaburoCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => error("No se pudo obtener la ubicación de tu trabajo.")
+      );
+    }
+  };
+
   const handleSubmit = async () => {
     setSubmitLoading(true);
     setCodigoVerificacion(null);
@@ -214,6 +251,8 @@ export default function RegisterForm({
         seccionalNro: data.seccionalNro,
         cedulaOperador: data.cedulaOperador,
         gpsCoords: gpsCoords ? { lat: gpsCoords.lat, lng: gpsCoords.lng } : null,
+        gpsCasa: gpsCasaCoords ? { lat: gpsCasaCoords.lat, lng: gpsCasaCoords.lng } : null,
+        gpsLaburo: gpsLaburoCoords ? { lat: gpsLaburoCoords.lat, lng: gpsLaburoCoords.lng } : null,
       };
       // #region agent log
       fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:beforeFetch", message: "calling fetch", data: { url: "/api/subscriptores" }, hypothesisId: "H1", timestamp: Date.now() }) }).catch(() => {});
@@ -226,7 +265,21 @@ export default function RegisterForm({
       // #region agent log
       fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:afterFetch", message: "fetch completed", data: { status: res.status, ok: res.ok, contentType: res.headers.get("content-type") }, hypothesisId: "H1,H2", timestamp: Date.now() }) }).catch(() => {});
       // #endregion
-      const json = await res.json();
+      const contentType = res.headers.get("content-type") || "";
+      let json: { error?: string; codigoVerificacion?: string } = {};
+      if (contentType.includes("application/json")) {
+        json = await res.json();
+      } else {
+        const text = await res.text();
+        try {
+          json = JSON.parse(text) as { error?: string };
+        } catch {
+          setSubmitError(res.ok ? "No se pudo leer la respuesta." : `Error del servidor (${res.status}). Reintentá más tarde.`);
+          error(res.ok ? "No se pudo leer la respuesta." : `Error del servidor (${res.status}). Reintentá más tarde.`);
+          setSubmitLoading(false);
+          return;
+        }
+      }
       if (!res.ok) {
         const errMsg = json?.error ?? "No se pudo guardar la inscripción.";
         setSubmitError(errMsg);
@@ -247,7 +300,11 @@ export default function RegisterForm({
       // #region agent log
       fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:catch", message: "submit catch", data: { errName: (e as Error)?.name, errMessage: (e as Error)?.message }, hypothesisId: "H1,H2,H5", timestamp: Date.now() }) }).catch(() => {});
       // #endregion
-      const errMsg = "Error de conexión. Reintentá más tarde.";
+      const isNetworkError =
+        e instanceof TypeError && (e.message === "Failed to fetch" || e.message.includes("NetworkError"));
+      const errMsg = isNetworkError
+        ? "Error de conexión. Revisá tu internet y reintentá."
+        : (e instanceof Error ? e.message : "No se pudo guardar. Reintentá más tarde.");
       setSubmitError(errMsg);
       error(errMsg);
       setSubmitLoading(false);
@@ -355,7 +412,7 @@ export default function RegisterForm({
                 )}
               </div>
               <div>
-                <label className="label-yapo">Correo electrónico <span className="text-gray-400 font-normal">(opcional)</span></label>
+                <label className="label-yapo">Correo electrónico <span className="text-gray-600 font-normal">(opcional)</span></label>
                 <input
                   type="email"
                   value={data.email}
@@ -365,7 +422,7 @@ export default function RegisterForm({
                 />
               </div>
               <div>
-                <label className="label-yapo">Facebook (usuario o enlace) <span className="text-gray-400 font-normal">(opcional)</span></label>
+                <label className="label-yapo">Facebook (usuario o enlace) <span className="text-gray-600 font-normal">(opcional)</span></label>
                 <input
                   type="text"
                   value={data.facebook}
@@ -375,7 +432,7 @@ export default function RegisterForm({
                 />
               </div>
               <div>
-                <label className="label-yapo">Instagram (usuario o enlace) <span className="text-gray-400 font-normal">(opcional)</span></label>
+                <label className="label-yapo">Instagram (usuario o enlace) <span className="text-gray-600 font-normal">(opcional)</span></label>
                 <input
                   type="text"
                   value={data.instagram}
@@ -410,6 +467,14 @@ export default function RegisterForm({
                 <MapPin className="w-5 h-5" />
                 Perfil Laboral e IA
               </h3>
+              <div className="rounded-xl border-2 border-yapo-blue/20 bg-yapo-gray/50 p-4 flex gap-3">
+                <Info className="w-5 h-5 text-yapo-blue shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-700">
+                  <p className="font-medium text-yapo-blue mb-1">¿Cómo se valida tu suscripción?</p>
+                  <p>Si aún no tenés certificación (SNPP, SINAFOCAL u otro título), se te asignará un <strong>Operador YAPÓ</strong> para validar tu oficio.</p>
+                  <p className="mt-1">Si ya tenés certificación y cumplís los parámetros, tu suscripción se valida <strong>automáticamente</strong> y pasás directo a la base, sin necesidad de un operador.</p>
+                </div>
+              </div>
               <div>
                 <label className="label-yapo">Oficio Principal</label>
                 <input
@@ -539,6 +604,56 @@ export default function RegisterForm({
                     )}
                   />
                 </button>
+              </div>
+
+              {/* GPS Casa y Trabajo */}
+              <div className="rounded-xl border-2 border-yapo-blue/30 bg-white p-4 space-y-4">
+                <p className="font-medium text-yapo-blue">Ubicación de casa y trabajo</p>
+                <p className="text-xs text-gray-600">Necesitamos la ubicación de tu casa y de tu lugar de trabajo para la validación.</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="label-yapo flex items-center gap-2">
+                      <Home className="w-4 h-4" />
+                      Ubicación de tu casa
+                    </label>
+                    {!gpsCasaCoords ? (
+                      <button
+                        type="button"
+                        onClick={captureGpsCasa}
+                        className="btn-yapo btn-yapo-outline w-full min-h-[48px]"
+                      >
+                        <MapPin className="w-4 h-4 inline mr-1" />
+                        Capturar ubicación casa
+                      </button>
+                    ) : (
+                      <p className="text-sm text-green-700 flex items-center gap-1">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Casa: {gpsCasaCoords.lat.toFixed(5)}, {gpsCasaCoords.lng.toFixed(5)}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="label-yapo flex items-center gap-2">
+                      <Briefcase className="w-4 h-4" />
+                      Ubicación de tu trabajo
+                    </label>
+                    {!gpsLaburoCoords ? (
+                      <button
+                        type="button"
+                        onClick={captureGpsLaburo}
+                        className="btn-yapo btn-yapo-outline w-full min-h-[48px]"
+                      >
+                        <MapPin className="w-4 h-4 inline mr-1" />
+                        Capturar ubicación trabajo
+                      </button>
+                    ) : (
+                      <p className="text-sm text-green-700 flex items-center gap-1">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Trabajo: {gpsLaburoCoords.lat.toFixed(5)}, {gpsLaburoCoords.lng.toFixed(5)}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Matriz de preclasificación A/B/C */}
@@ -746,9 +861,34 @@ export default function RegisterForm({
                   />
                 </div>
               )}
+              <div className="p-4 rounded-xl bg-blue-50 border-2 border-blue-200 text-sm flex items-start gap-2">
+                <Info className="w-5 h-5 shrink-0 mt-0.5 text-yapo-blue" aria-hidden />
+                <p className="text-[#1e3a8a] font-medium">
+                  Si tenés certificación (SNPP, SINAFOCAL, etc.) y cumplís los requisitos, tu ficha puede validarse automáticamente. Si no, un Operador YAPÓ de tu zona te va a contactar para coordinar la verificación.
+                </p>
+              </div>
               {submitError && (
                 <div className="mb-4 p-4 rounded-xl bg-red-50 border-2 border-red-200 text-red-800 text-sm" role="alert">
                   {submitError}
+                </div>
+              )}
+              {submitSuccess && codigoVerificacion && (
+                <div className="mb-6 p-6 rounded-2xl bg-green-50 border-2 border-green-300 text-center">
+                  <div className="flex justify-center mb-3">
+                    <span className="flex items-center justify-center w-16 h-16 rounded-full bg-green-600 text-white" aria-hidden>
+                      <CheckCircle2 className="w-10 h-10" strokeWidth={2.5} />
+                    </span>
+                  </div>
+                  <p className="text-xl font-bold text-green-900 mb-1">¡Listo! Tu inscripción fue enviada</p>
+                  <p className="text-sm text-green-800 mb-2 font-medium">Guardá este código; lo vas a necesitar para consultar el estado de tu ficha.</p>
+                  <p className="text-2xl font-bold text-green-900 tracking-wider select-all mb-4" aria-label={`Código de verificación: ${codigoVerificacion}`}>{codigoVerificacion}</p>
+                  <Link
+                    href={`/verificar?codigo=${encodeURIComponent(codigoVerificacion)}`}
+                    className="btn-yapo btn-yapo-primary inline-flex min-h-[48px]"
+                  >
+                    <Search className="w-5 h-5" aria-hidden />
+                    Consultar estado ahora
+                  </Link>
                 </div>
               )}
               <div className="flex justify-between pt-4">
@@ -759,39 +899,30 @@ export default function RegisterForm({
                 >
                   <ChevronLeft className="w-5 h-5" /> Atrás
                 </button>
-                {submitSuccess && codigoVerificacion && (
-                  <div className="mb-4 p-4 rounded-xl bg-green-50 border-2 border-green-200">
-                    <p className="text-sm font-medium text-green-800 mb-1">Tu código de verificación</p>
-                    <p className="text-2xl font-bold text-green-900 tracking-wider select-all">{codigoVerificacion}</p>
-                    <p className="text-xs text-green-700 mt-2">Guardalo para consultar el estado de tu inscripción más adelante.</p>
+                {!submitSuccess && (
+                  <div className="flex flex-col items-end gap-1">
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={!canNext3 || submitLoading}
+                      className="btn-yapo btn-yapo-primary disabled:opacity-50 flex items-center gap-2 min-h-[48px]"
+                      title={!canNext3 && step3Missing.length > 0 ? `Completá: ${step3Missing.join(", ")}` : undefined}
+                    >
+                      {submitLoading ? (
+                        <>
+                          <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enviando…
+                        </>
+                      ) : (
+                        "Enviar registro"
+                      )}
+                    </button>
+                    {!canNext3 && step3Missing.length > 0 && (
+                      <span className="text-xs text-amber-700">
+                        Para enviar completá: {step3Missing.join(", ")}
+                      </span>
+                    )}
                   </div>
                 )}
-                <div className="flex flex-col items-end gap-1">
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={!canNext3 || submitLoading}
-                    className="btn-yapo btn-yapo-primary disabled:opacity-50 flex items-center gap-2"
-                    title={!canNext3 && step3Missing.length > 0 ? `Completá: ${step3Missing.join(", ")}` : undefined}
-                  >
-                    {submitSuccess ? (
-                      <>
-                        <CheckCircle2 className="w-5 h-5 animate-pulse" /> ¡Enviado!
-                      </>
-                    ) : submitLoading ? (
-                      <>
-                        <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enviando…
-                      </>
-                    ) : (
-                      "Enviar registro"
-                    )}
-                  </button>
-                  {!canNext3 && step3Missing.length > 0 && (
-                    <span className="text-xs text-amber-700">
-                      Para enviar completá: {step3Missing.join(", ")}
-                    </span>
-                  )}
-                </div>
               </div>
             </motion.div>
           )}
