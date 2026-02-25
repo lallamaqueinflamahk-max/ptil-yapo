@@ -2,10 +2,12 @@
  * PATCH - Registrar dictamen del Operador YAPÓ al Comité.
  * Body: { fichaId, cedulaOperador, dictamen, evidenciaFaltaEquipo? }.
  * dictamen: APROBADO | APROBADO_OBSERVACION | RECHAZADO | DERIVAR_CAPACITACION
+ * En APROBADO/APROBADO_OBSERVACION se acredita la comisión en Billetera YAPÓ.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { debeDerivarACapacitacion } from "@/lib/idoneidad/clasificacion";
+import { COMISION_POR_VALIDACION } from "@/lib/constants/comision";
 
 const DICTAMENES_VALIDOS = ["APROBADO", "APROBADO_OBSERVACION", "RECHAZADO", "DERIVAR_CAPACITACION"] as const;
 
@@ -74,6 +76,30 @@ export async function PATCH(request: NextRequest) {
       where: { id: fichaId },
       data: actualizar,
     });
+
+    // Acreditar comisión en Billetera YAPÓ del operador
+    if (dictamen === "APROBADO" || dictamen === "APROBADO_OBSERVACION") {
+      const operador = await prisma.operador.findUnique({
+        where: { cedula: cedulaOperador },
+      });
+      if (operador) {
+        await prisma.$transaction([
+          prisma.operador.update({
+            where: { id: operador.id },
+            data: { saldoDisponible: { increment: COMISION_POR_VALIDACION } },
+          }),
+          prisma.billeteraMovimiento.create({
+            data: {
+              operadorId: operador.id,
+              tipo: "COMISION_ACREDITADA",
+              monto: COMISION_POR_VALIDACION,
+              referencia: fichaId,
+              estado: "COMPLETADO",
+            },
+          }),
+        ]);
+      }
+    }
 
     if (dictamen === "DERIVAR_CAPACITACION") {
       const grupo = ficha.clasificacionAutomatica;

@@ -70,6 +70,22 @@ export default function DashboardLayout({
             <nav className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-hide max-w-full">
               {navItems.map(({ href, label, shortLabel, icon: iconKey }) => {
                 const Icon = ICONS[iconKey] ?? Settings;
+                // #region agent log
+                if (href === "/dashboard/operador" && typeof window !== "undefined") {
+                  fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" },
+                    body: JSON.stringify({
+                      sessionId: "a4fa08",
+                      location: "dashboard/layout.tsx:nav",
+                      message: "operador nav item render",
+                      data: { href, iconKey, hasIcon: !!ICONS[iconKey] },
+                      timestamp: Date.now(),
+                      hypothesisId: "B",
+                    }),
+                  }).catch(() => {});
+                }
+                // #endregion
                 const isActive =
                   pathname === href ||
                   (href !== "/dashboard" && pathname.startsWith(href));

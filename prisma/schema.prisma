@@ -95,12 +95,27 @@ model Certificacion {
 
 // Operador YAPÓ: zona (seccional) para geofencing "alertas en tu zona".
 model Operador {
-  id             String   @id @default(cuid())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  cedula         String   @unique // Cédula del operador (identificador)
-  seccionalNro   String   // Zona/barrio para recibir alertas
-  nombreCompleto String?
-  whatsapp       String?  // Contacto del operador para suscriptores
-  avatarUrl      String?  // URL de foto del operador (opcional)
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  cedula            String   @unique // Cédula del operador (identificador)
+  seccionalNro      String   // Zona/barrio para recibir alertas
+  nombreCompleto   String?
+  whatsapp          String?  // Contacto del operador para suscriptores
+  avatarUrl         String?  // URL de foto del operador (opcional)
+  saldoDisponible   Int      @default(0) // Billetera YAPÓ: saldo en Gs (guaraníes)
+  mangoPhone        String?  // Teléfono vinculado a Billetera Mango (cuenta personal del usuario)
+  movimientos       BilleteraMovimiento[]
+}
+
+// Movimientos de la Billetera YAPÓ del operador (comisiones acreditadas, retiros).
+model BilleteraMovimiento {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  operadorId   String
+  operador    Operador @relation(fields: [operadorId], references: [id], onDelete: Cascade)
+  tipo         String   // COMISION_ACREDITADA | RETIRO_MANGO | RETIRO_CUENTA_BANCARIA
+  monto        Int      // En guaraníes (Gs). Positivo = ingreso, negativo = retiro (guardamos positivo y tipo)
+  referencia   String?  // Ej: fichaId para comisión, número de operación para retiro
+  estado       String   @default("COMPLETADO") // COMPLETADO | PENDIENTE | RECHAZADO
 }

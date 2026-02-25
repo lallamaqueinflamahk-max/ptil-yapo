@@ -4,12 +4,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import useSWR from "swr";
 import Image from "next/image";
-import { UserPlus, Camera, MapPin, CheckCircle2, Send, Coins, AlertTriangle, GraduationCap, XCircle, User, Navigation } from "lucide-react";
+import { UserPlus, Camera, MapPin, CheckCircle2, Send, Coins, AlertTriangle, GraduationCap, XCircle, User, Navigation, Wallet, ArrowDownCircle, ArrowUpCircle, Link2, Unlink } from "lucide-react";
 import { mensajeBienvenidaYapo } from "@/lib/messages/whatsappBienvenida";
 import { PAGES } from "@/lib/copy/dashboard";
 import PageHero from "@/components/dashboard/PageHero";
-
-const COMISION_POR_VALIDACION = 5000;
+import { COMISION_POR_VALIDACION } from "@/lib/constants/comision";
 const OPERADOR_CEDULA_KEY = "operador_yapo_cedula";
 const OPERADOR_SECCIONAL_KEY = "operador_yapo_seccional";
 
@@ -66,6 +65,13 @@ export default function DashboardOperadorPage() {
     if (c) setCedula(c);
     if (s) setSeccionalNro(s);
     if (c) setPerfilGuardado(true);
+    // #region agent log
+    fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" },
+      body: JSON.stringify({ sessionId: "a4fa08", location: "operador/page.tsx:mount", message: "operador page mounted", data: { hasCedula: !!c, hasSeccional: !!s }, timestamp: Date.now(), hypothesisId: "C" }),
+    }).catch(() => {});
+    // #endregion
   }, []);
 
   const guardarPerfil = useCallback(async () => {
@@ -100,7 +106,24 @@ export default function DashboardOperadorPage() {
   }, [cedula, seccionalNro, nombreCompleto, whatsappOperador]);
 
   const operadorProfileUrl = perfilGuardado && cedula ? `/api/operador?cedula=${encodeURIComponent(cedula)}` : null;
-  const { data: operadorProfile, mutate: mutateOperadorProfile } = useSWR<{ nombreCompleto?: string | null; whatsapp?: string | null; avatarUrl?: string | null }>(operadorProfileUrl, fetcher);
+  const { data: operadorProfileRaw, error: operadorProfileError, mutate: mutateOperadorProfile } = useSWR<{ nombreCompleto?: string | null; whatsapp?: string | null; avatarUrl?: string | null; error?: string }>(operadorProfileUrl, fetcher);
+  // #region agent log
+  if (typeof window !== "undefined") {
+    fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" },
+      body: JSON.stringify({
+        sessionId: "a4fa08",
+        location: "operador/page.tsx:SWR",
+        message: "operador profile state",
+        data: { operadorProfileUrl, hasData: !!operadorProfileRaw, hasError: !!operadorProfileError, dataKeys: operadorProfileRaw ? Object.keys(operadorProfileRaw) : [], errorInData: operadorProfileRaw && "error" in operadorProfileRaw ? (operadorProfileRaw as { error?: string }).error : null },
+        timestamp: Date.now(),
+        hypothesisId: "A",
+      }),
+    }).catch(() => {});
+  }
+  // #endregion
+  const operadorProfile = operadorProfileRaw && !("error" in operadorProfileRaw && operadorProfileRaw.error) ? operadorProfileRaw : undefined;
   const operadorAvatarInputRef = useRef<HTMLInputElement>(null);
 
   const actualizarAvatarOperador = useCallback(
@@ -159,6 +182,20 @@ export default function DashboardOperadorPage() {
   const otros = validaciones.filter((v) => v.estado === "rechazado" || v.estado === "derivar_capacitacion");
   const comisionTotal = aprobados.length * COMISION_POR_VALIDACION;
 
+  const billeteraUrl = perfilGuardado && cedula ? `/api/operador/billetera?cedula=${encodeURIComponent(cedula)}` : null;
+  const { data: billeteraData, mutate: mutateBilletera } = useSWR<{
+    saldoYapo: number;
+    mangoVinculado: boolean;
+    mangoPhone: string | null;
+    movimientos: { id: string; tipo: string; monto: number; referencia: string | null; estado: string; createdAt: string }[];
+  }>(billeteraUrl, fetcher);
+  const [mangoPhoneInput, setMangoPhoneInput] = useState("");
+  const [retiroMonto, setRetiroMonto] = useState("");
+  const [retiroDestino, setRetiroDestino] = useState<"MANGO" | "CUENTA_BANCARIA" | null>(null);
+  const [loadingVincular, setLoadingVincular] = useState(false);
+  const [loadingRetirar, setLoadingRetirar] = useState(false);
+  const [errorBilletera, setErrorBilletera] = useState<string | null>(null);
+
   const tomarVerificacion = async (item: AlertaItem) => {
     if (!cedula) return;
     setTomandoId(item.id);
@@ -200,6 +237,7 @@ export default function DashboardOperadorPage() {
         setMostrarComisionGanada(true);
         const mensaje = mensajeBienvenidaYapo(item.nombreTrabajador);
         console.log("WhatsApp bienvenida enviado a", item.whatsapp, mensaje);
+        await mutateBilletera();
       }
       await mutateValidaciones();
       setTimeout(() => setFeedbackNombre(null), 5000);
@@ -324,7 +362,7 @@ export default function DashboardOperadorPage() {
                 className="relative w-14 h-14 rounded-full overflow-hidden bg-yapo-blue/20 ring-2 ring-yapo-blue/40 flex items-center justify-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yapo-blue"
                 title="Cambiar foto de perfil"
               >
-                {operadorProfile?.avatarUrl ? (
+                {operadorProfile?.avatarUrl && typeof operadorProfile.avatarUrl === "string" && (operadorProfile.avatarUrl.startsWith("data:") || operadorProfile.avatarUrl.startsWith("http") || operadorProfile.avatarUrl.startsWith("/")) ? (
                   <Image
                     src={operadorProfile.avatarUrl}
                     alt=""
@@ -584,6 +622,30 @@ export default function DashboardOperadorPage() {
             <strong>{COMISION_POR_VALIDACION.toLocaleString("es-PY")} Gs</strong>. El primero que toma la verificación (geofencing) se queda con el suscriptor.
           </p>
         </div>
+
+        <section className="bg-white rounded-2xl shadow p-6 border border-gray-200/60">
+          <h2 className="text-lg font-semibold text-yapo-blue mb-4">Retirar a billetera</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-yapo-blue/40 transition-colors">
+              <div className="w-14 h-14 rounded-xl overflow-hidden bg-white shrink-0 flex items-center justify-center">
+                <Image src="/images/billetera-mango.png" alt="" width={56} height={56} className="object-contain" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">Billetera Mango</p>
+                <p className="text-sm text-gray-600">Retirar comisión a tu Billetera Mango</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-yapo-blue/40 transition-colors">
+              <div className="w-14 h-14 rounded-xl overflow-hidden bg-white shrink-0 flex items-center justify-center">
+                <Image src="/images/billetera-yapo.png" alt="" width={56} height={56} className="object-contain" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">Paga Billetera YAPÓ</p>
+                <p className="text-sm text-gray-600">Retirar comisión a Paga Billetera YAPÓ</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div className="bg-white rounded-[14px] border border-gray-200/60 shadow-card p-6 flex items-center gap-4">
           <MapPin className="w-10 h-10 text-dash-blue shrink-0" />

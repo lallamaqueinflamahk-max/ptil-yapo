@@ -289,7 +289,6 @@ export default function AsistenteMaestroBar({ inNavbar = false }: AsistenteMaest
                     </button>
                   </div>
                 </div>
-              </div>
     </motion.div>
   );
 
