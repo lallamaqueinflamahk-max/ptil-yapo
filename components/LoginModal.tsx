@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import clsx from "clsx";
+import { setStaffRole } from "@/lib/staffRole";
 type Role = "maestro" | "pro" | "operador" | "capacitacion" | null;
 
 const ROLE_REDIRECTS: Record<NonNullable<Role>, string> = {
@@ -32,6 +33,7 @@ export default function LoginModal({
     setError("");
     const path = ROLE_REDIRECTS[role as NonNullable<Role>];
     if (!path) return;
+    setStaffRole(role as NonNullable<Role>);
     onClose();
     router.push(path);
   };

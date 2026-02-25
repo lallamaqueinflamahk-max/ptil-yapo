@@ -95,10 +95,12 @@ model Certificacion {
 
 // Operador YAPÓ: zona (seccional) para geofencing "alertas en tu zona".
 model Operador {
-  id            String   @id @default(cuid())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  cedula        String   @unique // Cédula del operador (identificador)
-  seccionalNro  String   // Zona/barrio para recibir alertas
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  cedula         String   @unique // Cédula del operador (identificador)
+  seccionalNro   String   // Zona/barrio para recibir alertas
   nombreCompleto String?
+  whatsapp       String?  // Contacto del operador para suscriptores
+  avatarUrl      String?  // URL de foto del operador (opcional)
 }

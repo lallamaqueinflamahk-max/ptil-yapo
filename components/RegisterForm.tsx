@@ -91,6 +91,7 @@ export default function RegisterForm({
   const [tipificacionLoading, setTipificacionLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [codigoVerificacion, setCodigoVerificacion] = useState<string | null>(null);
   const { toasts, success, error, dismiss } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -188,6 +189,7 @@ export default function RegisterForm({
   const handleSubmit = async () => {
     setSubmitLoading(true);
     setCodigoVerificacion(null);
+    setSubmitError(null);
     // #region agent log
     fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:handleSubmit", message: "submit started", data: { step, hasSelfie: !!data.selfieDataUrl, hasGps: !!gpsCoords }, hypothesisId: "H5", timestamp: Date.now() }) }).catch(() => {});
     // #endregion
@@ -226,12 +228,18 @@ export default function RegisterForm({
       // #endregion
       const json = await res.json();
       if (!res.ok) {
-        error(json?.error ?? "No se pudo guardar la inscripción.");
+        const errMsg = json?.error ?? "No se pudo guardar la inscripción.";
+        setSubmitError(errMsg);
+        error(errMsg);
         setSubmitLoading(false);
+        // #region agent log
+        fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:resNotOk", message: "API error response", data: { status: res.status, error: errMsg }, hypothesisId: "H2", timestamp: Date.now() }) }).catch(() => {});
+        // #endregion
         return;
       }
       setSubmitLoading(false);
       setSubmitSuccess(true);
+      setSubmitError(null);
       setCodigoVerificacion(json.codigoVerificacion ?? null);
       success("Inscripción guardada. Guardá tu código de verificación.");
       setTimeout(() => onClose(), 4000);
@@ -239,10 +247,18 @@ export default function RegisterForm({
       // #region agent log
       fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:catch", message: "submit catch", data: { errName: (e as Error)?.name, errMessage: (e as Error)?.message }, hypothesisId: "H1,H2,H5", timestamp: Date.now() }) }).catch(() => {});
       // #endregion
-      error("Error de conexión. Reintentá más tarde.");
+      const errMsg = "Error de conexión. Reintentá más tarde.";
+      setSubmitError(errMsg);
+      error(errMsg);
       setSubmitLoading(false);
     }
   };
+
+  const step3Missing = [];
+  if (data.gestorZona === "") step3Missing.push("Gestor de zona");
+  if (data.cargoGestor === "") step3Missing.push("Cargo gestor");
+  if (data.seccionalNro.trim() === "") step3Missing.push("Seccional");
+  if (isOperatorFlow && data.cedulaOperador.trim() === "") step3Missing.push("Cédula del Operador YAPÓ");
 
   return (
     <div className="fixed inset-0 z-50 bg-yapo-gray overflow-y-auto">
@@ -730,6 +746,11 @@ export default function RegisterForm({
                   />
                 </div>
               )}
+              {submitError && (
+                <div className="mb-4 p-4 rounded-xl bg-red-50 border-2 border-red-200 text-red-800 text-sm" role="alert">
+                  {submitError}
+                </div>
+              )}
               <div className="flex justify-between pt-4">
                 <button
                   type="button"
@@ -745,24 +766,32 @@ export default function RegisterForm({
                     <p className="text-xs text-green-700 mt-2">Guardalo para consultar el estado de tu inscripción más adelante.</p>
                   </div>
                 )}
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={!canNext3 || submitLoading}
-                  className="btn-yapo btn-yapo-primary disabled:opacity-50 flex items-center gap-2"
-                >
-                  {submitSuccess ? (
-                    <>
-                      <CheckCircle2 className="w-5 h-5 animate-pulse" /> ¡Enviado!
-                    </>
-                  ) : submitLoading ? (
-                    <>
-                      <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enviando…
-                    </>
-                  ) : (
-                    "Enviar registro"
+                <div className="flex flex-col items-end gap-1">
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={!canNext3 || submitLoading}
+                    className="btn-yapo btn-yapo-primary disabled:opacity-50 flex items-center gap-2"
+                    title={!canNext3 && step3Missing.length > 0 ? `Completá: ${step3Missing.join(", ")}` : undefined}
+                  >
+                    {submitSuccess ? (
+                      <>
+                        <CheckCircle2 className="w-5 h-5 animate-pulse" /> ¡Enviado!
+                      </>
+                    ) : submitLoading ? (
+                      <>
+                        <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enviando…
+                      </>
+                    ) : (
+                      "Enviar registro"
+                    )}
+                  </button>
+                  {!canNext3 && step3Missing.length > 0 && (
+                    <span className="text-xs text-amber-700">
+                      Para enviar completá: {step3Missing.join(", ")}
+                    </span>
                   )}
-                </button>
+                </div>
               </div>
             </motion.div>
           )}

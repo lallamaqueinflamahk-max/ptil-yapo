@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
         dictamenAt: true,
         evidenciaFaltaEquipo: true,
         asignadoAt: true,
+        gpsLat: true,
+        gpsLng: true,
       },
     });
 
@@ -43,6 +45,8 @@ export async function GET(request: NextRequest) {
       nombreTrabajador: f.nombreCompleto,
       oficio: f.oficioPrincipal,
       whatsapp: f.whatsapp,
+      gpsLat: f.gpsLat,
+      gpsLng: f.gpsLng,
       estado: f.dictamenOperador
         ? (f.dictamenOperador.toLowerCase() as "aprobado" | "aprobado_observacion" | "rechazado" | "derivar_capacitacion")
         : "pendiente",

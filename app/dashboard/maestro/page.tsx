@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useCallback, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { getStaffRole, canAccessMaestroUi } from "@/lib/staffRole";
 import useSWR from "swr";
 import { MapPin, Users, TrendingUp, PieChart, BarChart3, Table2, X, GitCompare, AlertTriangle, BarChart2, MessageCircle, ClipboardList, ShieldCheck, GraduationCap } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -224,6 +225,13 @@ function MaestroContent() {
   const selectedSeccionalNumero =
     chartFilter?.type === "seccional" ? parseInt(chartFilter.value, 10) : null;
   const urlSyncedRef = useRef(false);
+
+  useEffect(() => {
+    const role = getStaffRole();
+    if (!canAccessMaestroUi(role)) {
+      router.replace("/dashboard");
+    }
+  }, [router]);
 
   const [soloRiesgo, setSoloRiesgo] = useState(false);
   const [soloDatosPorcentajes, setSoloDatosPorcentajes] = useState(false);

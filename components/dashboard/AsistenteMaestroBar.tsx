@@ -35,7 +35,12 @@ interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
 }
 
-export default function AsistenteMaestroBar() {
+interface AsistenteMaestroBarProps {
+  /** Si true, el trigger va en el navbar (fijo arriba) y el panel abre debajo del header. */
+  inNavbar?: boolean;
+}
+
+export default function AsistenteMaestroBar({ inNavbar = false }: AsistenteMaestroBarProps) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -115,54 +120,63 @@ export default function AsistenteMaestroBar() {
     setListening(true);
   }, [listening]);
 
-  return (
-    <>
-      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-2 pb-2">
-        <div className="pointer-events-auto w-full max-w-lg">
-          <AnimatePresence mode="wait">
-            {!open ? (
-              <motion.button
-                key="bar"
-                type="button"
-                onClick={() => setOpen(true)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
-                }}
-                exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.99 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                className="w-full flex items-center gap-3 rounded-2xl text-white shadow-lg shadow-[#1E3A8A]/25 hover:shadow-xl hover:shadow-[#0D9488]/20 transition-shadow duration-300 py-3.5 px-4 text-left border-0 backdrop-blur-md"
-                style={{
-                  background: "linear-gradient(120deg, rgba(15,23,42,0.82) 0%, rgba(30,58,138,0.85) 50%, rgba(13,148,136,0.82) 100%)",
-                }}
-                aria-label="Abrir Asistente Maestro"
-              >
-                <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-white/25 backdrop-blur-sm text-white shrink-0">
-                  <Sparkles className="w-5 h-5" aria-hidden />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white text-sm tracking-tight">Asistente Maestro</p>
-                  <p className="text-xs text-white/85 truncate">Preguntame lo que necesitás</p>
-                </div>
-                <ChevronUp className="w-5 h-5 text-white/80 shrink-0" aria-hidden />
-              </motion.button>
-            ) : (
-              <motion.div
-                key="panel"
-                initial={{ opacity: 0, y: 20, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                className="rounded-2xl overflow-hidden flex flex-col max-h-[min(75vh,480px)] shadow-2xl ring-2 ring-[#0D9488]/30 backdrop-blur-xl"
-                style={{
-                  background: "linear-gradient(180deg, rgba(240,253,250,0.88) 0%, rgba(236,254,255,0.9) 12%, rgba(248,250,252,0.88) 30%, rgba(255,255,255,0.85) 100%)",
-                }}
-              >
-                {/* Cabecera con colores atractivos */}
+  const triggerNavbar = (
+    <button
+      type="button"
+      onClick={() => setOpen(true)}
+      className="flex items-center gap-2 rounded-xl px-3 py-2 text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all border-0"
+      style={{
+        background: "linear-gradient(135deg, rgba(30,58,138,0.95) 0%, rgba(13,148,136,0.95) 100%)",
+      }}
+      aria-label="Abrir Asistente"
+      title="Preguntame lo que necesitás"
+    >
+      <Sparkles className="w-4 h-4 shrink-0" aria-hidden />
+      <span className="hidden sm:inline">Asistente</span>
+    </button>
+  );
+
+  const triggerFloating = (
+    <motion.button
+      key="bar"
+      type="button"
+      onClick={() => setOpen(true)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 10, scale: 0.98 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="w-full flex items-center gap-3 rounded-2xl text-white shadow-lg shadow-[#1E3A8A]/25 hover:shadow-xl hover:shadow-[#0D9488]/20 transition-shadow duration-300 py-3.5 px-4 text-left border-0 backdrop-blur-md"
+      style={{
+        background: "linear-gradient(120deg, rgba(15,23,42,0.82) 0%, rgba(30,58,138,0.85) 50%, rgba(13,148,136,0.82) 100%)",
+      }}
+      aria-label="Abrir Asistente Maestro"
+    >
+      <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-white/25 backdrop-blur-sm text-white shrink-0">
+        <Sparkles className="w-5 h-5" aria-hidden />
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-white text-sm tracking-tight">Asistente Maestro</p>
+        <p className="text-xs text-white/85 truncate">Preguntame lo que necesitás</p>
+      </div>
+      <ChevronUp className="w-5 h-5 text-white/80 shrink-0" aria-hidden />
+    </motion.button>
+  );
+
+  const panelContent = (
+    <motion.div
+      key="panel"
+      initial={{ opacity: 0, y: inNavbar ? -10 : 20, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: inNavbar ? -10 : 10, scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+      className={`overflow-hidden flex flex-col shadow-2xl ring-2 ring-[#0D9488]/30 backdrop-blur-xl ${inNavbar ? "rounded-b-2xl max-h-[min(calc(100vh - 3.5rem), 480px)]" : "rounded-2xl max-h-[min(75vh,480px)]"}`}
+      style={{
+        background: "linear-gradient(180deg, rgba(240,253,250,0.88) 0%, rgba(236,254,255,0.9) 12%, rgba(248,250,252,0.88) 30%, rgba(255,255,255,0.85) 100%)",
+      }}
+    >
+      {/* Cabecera con colores atractivos */}
                 <div
                   className="flex-shrink-0 flex items-center justify-between gap-2 px-4 py-3.5 border-b border-[#0D9488]/25 backdrop-blur-md"
                   style={{
@@ -275,11 +289,46 @@ export default function AsistenteMaestroBar() {
                     </button>
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+              </div>
+    </motion.div>
+  );
+
+  if (inNavbar) {
+    return (
+      <>
+        {triggerNavbar}
+        <AnimatePresence>
+          {open && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-40 bg-black/30"
+                onClick={() => setOpen(false)}
+                aria-hidden
+              />
+              <div className="fixed left-0 right-0 top-14 z-50 flex justify-center px-2 pt-2">
+                <div className="w-full max-w-lg">{panelContent}</div>
+              </div>
+            </>
+          )}
+        </AnimatePresence>
+      </>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center pointer-events-none px-2 pb-2">
+      <div className="pointer-events-auto w-full max-w-lg">
+        <AnimatePresence mode="wait">
+          {!open ? (
+            triggerFloating
+          ) : (
+            panelContent
+          )}
+        </AnimatePresence>
       </div>
-    </>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,6 +18,7 @@ import { DashboardChartProvider } from "@/context/DashboardChartContext";
 import DashboardAvatar from "@/components/dashboard/DashboardAvatar";
 import AsistenteMaestroBar from "@/components/dashboard/AsistenteMaestroBar";
 import { PRODUCT, NAV } from "@/lib/copy/dashboard";
+import { getStaffRole, canAccessMaestroUi, MAESTRO_ONLY_PATHS, type StaffRole } from "@/lib/staffRole";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard,
@@ -29,12 +31,24 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Table2,
 };
 
+function navFilter(href: string, role: StaffRole): boolean {
+  if ((MAESTRO_ONLY_PATHS as readonly string[]).includes(href)) return canAccessMaestroUi(role);
+  return true;
+}
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [staffRole, setStaffRole] = useState<StaffRole>(null);
+
+  useEffect(() => {
+    setStaffRole(getStaffRole());
+  }, []);
+
+  const navItems = NAV.filter((item) => navFilter(item.href, staffRole));
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-gray-900 font-sans antialiased">
@@ -54,7 +68,7 @@ export default function DashboardLayout({
               <p className="text-[10px] text-gray-400 tracking-wide">{PRODUCT.byline}</p>
             </div>
             <nav className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-hide max-w-full">
-              {NAV.map(({ href, label, shortLabel, icon: iconKey }) => {
+              {navItems.map(({ href, label, shortLabel, icon: iconKey }) => {
                 const Icon = ICONS[iconKey] ?? Settings;
                 const isActive =
                   pathname === href ||
@@ -86,6 +100,7 @@ export default function DashboardLayout({
                 <Home className="w-4 h-4" aria-hidden />
                 <span className="hidden sm:inline">Inicio</span>
               </Link>
+              <AsistenteMaestroBar inNavbar />
               <DashboardAvatar />
             </nav>
           </div>
@@ -94,7 +109,6 @@ export default function DashboardLayout({
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <DashboardChartProvider>{children}</DashboardChartProvider>
       </main>
-      <AsistenteMaestroBar />
     </div>
   );
 }

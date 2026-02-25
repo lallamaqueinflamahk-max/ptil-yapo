@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         seccionalNro: true,
         gestorZona: true,
+        gpsLat: true,
+        gpsLng: true,
       },
     });
 
@@ -46,6 +48,8 @@ export async function GET(request: NextRequest) {
       fechaRegistro: formatFechaRelativa(f.createdAt),
       seccionalNro: f.seccionalNro,
       gestorZona: f.gestorZona,
+      gpsLat: f.gpsLat,
+      gpsLng: f.gpsLng,
     }));
 
     return NextResponse.json({ alertas: listado, total: listado.length });

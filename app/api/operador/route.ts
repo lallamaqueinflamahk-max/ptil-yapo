@@ -27,6 +27,8 @@ export async function GET(request: NextRequest) {
       cedula: operador.cedula,
       seccionalNro: operador.seccionalNro,
       nombreCompleto: operador.nombreCompleto,
+      whatsapp: operador.whatsapp,
+      avatarUrl: operador.avatarUrl,
     });
   } catch (e) {
     console.error("Error al obtener operador:", e);
@@ -43,6 +45,8 @@ export async function POST(request: NextRequest) {
     const cedula = body.cedula?.trim();
     const seccionalNro = body.seccionalNro?.trim();
     const nombreCompleto = body.nombreCompleto?.trim() || null;
+    const whatsapp = body.whatsapp?.trim() || null;
+    const avatarUrl = body.avatarUrl?.trim() || null;
 
     if (!cedula || !seccionalNro) {
       return NextResponse.json(
@@ -53,8 +57,13 @@ export async function POST(request: NextRequest) {
 
     const operador = await prisma.operador.upsert({
       where: { cedula },
-      create: { cedula, seccionalNro, nombreCompleto },
-      update: { seccionalNro, nombreCompleto: nombreCompleto ?? undefined },
+      create: { cedula, seccionalNro, nombreCompleto, whatsapp, avatarUrl },
+      update: {
+        seccionalNro,
+        nombreCompleto: nombreCompleto ?? undefined,
+        whatsapp: whatsapp ?? undefined,
+        avatarUrl: avatarUrl ?? undefined,
+      },
     });
 
     return NextResponse.json({
@@ -62,6 +71,8 @@ export async function POST(request: NextRequest) {
       cedula: operador.cedula,
       seccionalNro: operador.seccionalNro,
       nombreCompleto: operador.nombreCompleto,
+      whatsapp: operador.whatsapp,
+      avatarUrl: operador.avatarUrl,
     });
   } catch (e) {
     console.error("Error al registrar operador:", e);

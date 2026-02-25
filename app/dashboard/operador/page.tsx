@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import useSWR from "swr";
-import { UserPlus, Camera, MapPin, CheckCircle2, Send, Coins, AlertTriangle, GraduationCap, XCircle, User } from "lucide-react";
+import Image from "next/image";
+import { UserPlus, Camera, MapPin, CheckCircle2, Send, Coins, AlertTriangle, GraduationCap, XCircle, User, Navigation } from "lucide-react";
 import { mensajeBienvenidaYapo } from "@/lib/messages/whatsappBienvenida";
 import { PAGES } from "@/lib/copy/dashboard";
 import PageHero from "@/components/dashboard/PageHero";
@@ -24,6 +25,8 @@ interface ValidacionItem {
   fechaRegistro: string | null;
   dictamenLabel?: string | null;
   evidenciaFaltaEquipo?: boolean;
+  gpsLat?: number | null;
+  gpsLng?: number | null;
 }
 
 interface AlertaItem {
@@ -34,6 +37,12 @@ interface AlertaItem {
   fechaRegistro: string;
   seccionalNro?: string;
   gestorZona?: string;
+  gpsLat?: number | null;
+  gpsLng?: number | null;
+}
+
+function wazeUrl(lat: number, lng: number): string {
+  return `https://www.waze.com/ul?ll=${lat},${lng}&navigate=yes`;
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -41,6 +50,8 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 export default function DashboardOperadorPage() {
   const [cedula, setCedula] = useState("");
   const [seccionalNro, setSeccionalNro] = useState("");
+  const [nombreCompleto, setNombreCompleto] = useState("");
+  const [whatsappOperador, setWhatsappOperador] = useState("");
   const [perfilGuardado, setPerfilGuardado] = useState(false);
   const [feedbackNombre, setFeedbackNombre] = useState<string | null>(null);
   const [reenviandoId, setReenviandoId] = useState<string | null>(null);
@@ -69,7 +80,12 @@ export default function DashboardOperadorPage() {
       const res = await fetch("/api/operador", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cedula: c, seccionalNro: s }),
+        body: JSON.stringify({
+          cedula: c,
+          seccionalNro: s,
+          nombreCompleto: nombreCompleto.trim() || null,
+          whatsapp: whatsappOperador.trim() || null,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Error al guardar");
@@ -81,7 +97,49 @@ export default function DashboardOperadorPage() {
     } catch (e) {
       setErrorPerfil(e instanceof Error ? e.message : "No se pudo guardar el perfil.");
     }
-  }, [cedula, seccionalNro]);
+  }, [cedula, seccionalNro, nombreCompleto, whatsappOperador]);
+
+  const operadorProfileUrl = perfilGuardado && cedula ? `/api/operador?cedula=${encodeURIComponent(cedula)}` : null;
+  const { data: operadorProfile, mutate: mutateOperadorProfile } = useSWR<{ nombreCompleto?: string | null; whatsapp?: string | null; avatarUrl?: string | null }>(operadorProfileUrl, fetcher);
+  const operadorAvatarInputRef = useRef<HTMLInputElement>(null);
+
+  const actualizarAvatarOperador = useCallback(
+    async (dataUrl: string) => {
+      if (!cedula.trim() || !seccionalNro.trim()) return;
+      try {
+        const res = await fetch("/api/operador", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cedula: cedula.trim(),
+            seccionalNro: seccionalNro.trim(),
+            nombreCompleto: nombreCompleto.trim() || null,
+            whatsapp: whatsappOperador.trim() || null,
+            avatarUrl: dataUrl,
+          }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        await mutateOperadorProfile();
+      } catch (e) {
+        alert(e instanceof Error ? e.message : "No se pudo actualizar la foto.");
+      }
+    },
+    [cedula, seccionalNro, nombreCompleto, whatsappOperador, mutateOperadorProfile]
+  );
+
+  const handleOperadorAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => actualizarAvatarOperador(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  useEffect(() => {
+    if (operadorProfile?.nombreCompleto) setNombreCompleto(operadorProfile.nombreCompleto);
+    if (operadorProfile?.whatsapp) setWhatsappOperador(operadorProfile.whatsapp ?? "");
+  }, [operadorProfile?.nombreCompleto, operadorProfile?.whatsapp]);
 
   const alertasUrl = perfilGuardado && cedula ? `/api/operador/alertas?cedula=${encodeURIComponent(cedula)}` : null;
   const misValidacionesUrl = perfilGuardado && cedula ? `/api/operador/mis-validaciones?cedulaOperador=${encodeURIComponent(cedula)}` : null;
@@ -192,7 +250,7 @@ export default function DashboardOperadorPage() {
       />
 
       <div className="space-y-8">
-        {/* Perfil Operador: cédula + seccional para geofencing */}
+        {/* Perfil Operador: cédula, seccional, nombre, WhatsApp, avatar */}
         {!perfilGuardado ? (
           <section className="bg-white rounded-2xl p-6 shadow border-2 border-yapo-blue/30">
             <h2 className="text-lg font-semibold text-yapo-blue mb-2 flex items-center gap-2">
@@ -200,9 +258,9 @@ export default function DashboardOperadorPage() {
               Perfil Operador YAPÓ
             </h2>
             <p className="text-sm text-gray-600 mb-4">
-              Ingresá tu cédula y seccional para ver alertas en tu zona y cargar tus validaciones.
+              Ingresá tu cédula, seccional y datos de contacto para ver alertas en tu zona.
             </p>
-            <div className="flex flex-wrap gap-3 items-end">
+            <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
                 <input
@@ -210,7 +268,7 @@ export default function DashboardOperadorPage() {
                   value={cedula}
                   onChange={(e) => setCedula(e.target.value.replace(/\D/g, ""))}
                   placeholder="Solo números"
-                  className="input-yapo max-w-[200px]"
+                  className="input-yapo w-full max-w-[200px]"
                 />
               </div>
               <div>
@@ -220,16 +278,93 @@ export default function DashboardOperadorPage() {
                   value={seccionalNro}
                   onChange={(e) => setSeccionalNro(e.target.value)}
                   placeholder="Ej. 12"
-                  className="input-yapo max-w-[120px]"
+                  className="input-yapo w-full max-w-[120px]"
                 />
               </div>
-              <button type="button" onClick={guardarPerfil} className="btn-yapo btn-yapo-primary min-h-[52px]">
-                Guardar y cargar
-              </button>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
+                <input
+                  type="text"
+                  value={nombreCompleto}
+                  onChange={(e) => setNombreCompleto(e.target.value)}
+                  placeholder="Ej. Juan Pérez"
+                  className="input-yapo w-full max-w-xs"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp (tu número)</label>
+                <input
+                  type="text"
+                  value={whatsappOperador}
+                  onChange={(e) => setWhatsappOperador(e.target.value)}
+                  placeholder="Ej. 0981 123 456"
+                  className="input-yapo w-full max-w-xs"
+                />
+              </div>
             </div>
+            <button type="button" onClick={guardarPerfil} className="btn-yapo btn-yapo-primary min-h-[52px] mt-3">
+              Guardar y cargar
+            </button>
             {errorPerfil && <p className="text-red-600 text-sm mt-2">{errorPerfil}</p>}
           </section>
-        ) : null}
+        ) : (
+          <section className="bg-white rounded-2xl p-6 shadow border-2 border-yapo-blue/20 flex flex-wrap items-center gap-4">
+            <input
+              ref={operadorAvatarInputRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              aria-hidden
+              onChange={handleOperadorAvatarChange}
+            />
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => operadorAvatarInputRef.current?.click()}
+                className="relative w-14 h-14 rounded-full overflow-hidden bg-yapo-blue/20 ring-2 ring-yapo-blue/40 flex items-center justify-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-yapo-blue"
+                title="Cambiar foto de perfil"
+              >
+                {operadorProfile?.avatarUrl ? (
+                  <Image
+                    src={operadorProfile.avatarUrl}
+                    alt=""
+                    width={56}
+                    height={56}
+                    className="object-cover w-full h-full"
+                    unoptimized={operadorProfile.avatarUrl.startsWith("data:")}
+                  />
+                ) : (
+                  <span className="text-lg font-bold text-yapo-blue">
+                    {(() => {
+                      const n = (operadorProfile?.nombreCompleto || nombreCompleto || "").trim();
+                      if (!n) return "O";
+                      const parts = n.split(/\s+/);
+                      if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                      return n.slice(0, 2).toUpperCase();
+                    })()}
+                  </span>
+                )}
+                <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                  <Camera className="w-6 h-6 text-white" aria-hidden />
+                </span>
+              </button>
+              <div>
+                <p className="font-semibold text-gray-900">{operadorProfile?.nombreCompleto || nombreCompleto || "Operador YAPÓ"}</p>
+                <p className="text-sm text-gray-600">Cédula: {cedula.slice(-4)} · Seccional {seccionalNro}</p>
+                {(operadorProfile?.whatsapp || whatsappOperador) && (
+                  <a
+                    href={`https://wa.me/595${(operadorProfile?.whatsapp || whatsappOperador).replace(/\D/g, "").slice(-9)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-green-600 hover:underline"
+                  >
+                    WhatsApp: {operadorProfile?.whatsapp || whatsappOperador}
+                  </a>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         {feedbackNombre && (
           <div className="flex items-center gap-3 p-4 bg-green-100 border border-green-300 rounded-xl text-green-800">
@@ -263,14 +398,27 @@ export default function DashboardOperadorPage() {
                       <p className="font-medium text-gray-900">{item.nombreTrabajador}</p>
                       <p className="text-sm text-gray-600">{item.oficio} · {item.fechaRegistro}</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => tomarVerificacion(item)}
-                      disabled={tomandoId === item.id}
-                      className="btn-yapo min-h-[48px] px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold disabled:opacity-60"
-                    >
-                      {tomandoId === item.id ? "…" : "Tomar Verificación"}
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {typeof item.gpsLat === "number" && typeof item.gpsLng === "number" && (
+                        <a
+                          href={wazeUrl(item.gpsLat, item.gpsLng)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium bg-[#33CCFF]/15 text-[#33CCFF] hover:bg-[#33CCFF]/25 border border-[#33CCFF]/40"
+                        >
+                          <Navigation className="w-4 h-4" />
+                          Cómo llegar (Waze)
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => tomarVerificacion(item)}
+                        disabled={tomandoId === item.id}
+                        className="btn-yapo min-h-[48px] px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold disabled:opacity-60"
+                      >
+                        {tomandoId === item.id ? "…" : "Tomar Verificación"}
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -319,6 +467,17 @@ export default function DashboardOperadorPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium text-gray-900">{item.nombreTrabajador}</p>
                         <p className="text-sm text-gray-600">{item.oficio} · {item.whatsapp}</p>
+                        {typeof item.gpsLat === "number" && typeof item.gpsLng === "number" && (
+                          <a
+                            href={wazeUrl(item.gpsLat, item.gpsLng)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#33CCFF]/15 text-[#33CCFF] hover:bg-[#33CCFF]/25 border border-[#33CCFF]/40 ml-auto"
+                          >
+                            <Navigation className="w-3.5 h-3.5" />
+                            Waze
+                          </a>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button
