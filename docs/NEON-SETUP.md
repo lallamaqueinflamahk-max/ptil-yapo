@@ -66,7 +66,7 @@ Para que las fotos no den error 413:
 ## 5. Comprobar que todo funciona
 
 - **En Vercel**: abrí `https://tu-proyecto.vercel.app`, completá el formulario de inscripción y enviá. Deberías ver el mensaje de éxito y el código de verificación.
-- **Si ves "DATABASE_URL no está configurada" o "La base de datos no está configurada"**: la variable no está en Vercel o no hiciste **Redeploy** después de agregarla (Deployments → ⋮ → Redeploy).
+- **Si ves "DATABASE_URL no está configurada" o "La base de datos no está configurada"**: la variable no está en Vercel o no hiciste **Redeploy** después de agregarla (Deployments → ⋮ → Redeploy). Comprobá abriendo **tu-dominio.vercel.app/api/health/db**: si dice `"database":"missing"`, la variable no llega al servidor.
 - **Si Vercel no te deja guardar la variable ("invalid characters")**: en **Key** escribí a mano solo: `DATABASE_URL` (sin pegar nada, sin espacios). En **Value** pegá la URL de Neon.
 - **Si ves "Las tablas no existen"**: ejecutá una vez en tu PC: `npx prisma db push` (con la misma `DATABASE_URL` de Neon en tu `.env`). Ver paso 3.
 

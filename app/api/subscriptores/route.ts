@@ -164,8 +164,11 @@ export async function POST(request: NextRequest) {
     } else if (process.env.NODE_ENV === "development" && (err as Error)?.message) {
       message = `Error al guardar: ${((err as Error).message).slice(0, 120)}`;
     } else if (process.env.NODE_ENV === "production") {
+      const raw = (err as Error)?.message ?? "";
+      const sanitized = raw.replace(/postgresql:\/\/[^\s]+/gi, "").replace(/\s+/g, " ").trim().slice(0, 100);
       message =
-        "No se pudo guardar. Revisá en Vercel que DATABASE_URL esté configurado (base de datos en la nube, ej. Neon o Supabase).";
+        "No se pudo guardar. Comprobá: 1) Abrí en el navegador tu-sitio.vercel.app/api/health/db (debe decir database configured). 2) Si no, agregá DATABASE_URL en Vercel y Redeploy. 3) Revisá Vercel → Deployments → Function Logs para el error real." +
+        (sanitized ? ` Detalle: ${sanitized}` : "");
     }
 
     return NextResponse.json({ error: message }, { status: 500 });
