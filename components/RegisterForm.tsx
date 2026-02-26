@@ -66,7 +66,7 @@ const defaultData: FormData = {
   seguroSocial: false,
   selfieDataUrl: null,
   gpsActivo: false,
-  promotor: "Miguel Sosa",
+  promotor: "Juan Referente",
   gestorZona: "",
   cargoGestor: "",
   seccionalNro: "",
@@ -75,7 +75,7 @@ const defaultData: FormData = {
 
 const NIVEL_ESTUDIOS = ["SNPP", "SINAFOCAL", "Otros", "Empírico"];
 const SITUACION = ["Desempleado", "Contratado", "Independiente"];
-const GESTORES = ["Miguel Sosa", "Juan Pérez", "María García", "Carlos López"];
+const GESTORES = ["Juan Referente", "Juan Pérez", "María García", "Carlos López"];
 const CARGOS = ["Presidente de Seccional", "Convencional"];
 
 interface RegisterFormProps {

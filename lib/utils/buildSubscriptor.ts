@@ -86,7 +86,7 @@ export function buildSubscriptor(
         estado_empleo: estadoEmpleoNorm,
       },
       respaldo_confianza: {
-        promotor_yapo: data.promotor.trim() || "Miguel Sosa",
+        promotor_yapo: data.promotor.trim() || "Juan Referente",
         gestor_zona: {
           nombre: data.gestorZona.trim(),
           cargo: cargoNorm,

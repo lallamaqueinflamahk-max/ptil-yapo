@@ -8,7 +8,7 @@ import { getDataSource } from "@/lib/config/territory";
 
 const TIPOS = ["CREACION", "ACTUALIZACION", "LOGIN", "CAMBIO_ESTADO", "EXPORTACION"] as const;
 const ENTIDADES = ["Subscriptor", "Seccional", "Usuario", "Dirigente"];
-const USUARIOS = ["Usuario Maestro", "Operador 12", "Pro Sosa", "Sistema"];
+const USUARIOS = ["Usuario Maestro", "Operador 12", "Pro Referente", "Sistema"];
 
 function mockEventos(): EventoAuditoria[] {
   const now = Date.now();

@@ -56,7 +56,7 @@ export async function crearFicha(data: CrearFichaInput): Promise<{
       gpsCasaLng: data.gpsCasa?.lng ?? null,
       gpsLaburoLat: data.gpsLaburo?.lat ?? null,
       gpsLaburoLng: data.gpsLaburo?.lng ?? null,
-      promotorYapo: data.promotor?.trim() || "Miguel Sosa",
+      promotorYapo: data.promotor?.trim() || "Juan Referente",
       gestorZona: (data.gestorZona?.trim() || "Prueba"),
       cargoGestor: (data.cargoGestor?.trim() || "Prueba"),
       seccionalNro: (data.seccionalNro?.trim() || "Prueba"),

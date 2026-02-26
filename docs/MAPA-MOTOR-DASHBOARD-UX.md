@@ -93,7 +93,7 @@ La **línea de tiempo** del dashboard (30/60/90 días) puede ser la misma que al
 
 | Filtro global (KPI, ranking, estado) | Efecto en el mapa |
 |-------------------------------------|-------------------|
-| `chartFilter = { type: "ranking", value: "Sosa" }` | Mapa recibe `selectedRanking`; puede resaltar o filtrar seccionales asociadas a ese líder. |
+| `chartFilter = { type: "ranking", value: "Referente" }` | Mapa recibe `selectedRanking`; puede resaltar o filtrar seccionales asociadas a ese líder. |
 | `chartFilter = { type: "seccional", value: "12" }` | Mapa recibe `selectedNumero`; centra y abre panel de esa seccional. |
 | "Solo seccionales en riesgo" (soloRiesgo) | Mapa recibe solo seccionales rojas/amarillas; las dibuja; filtro Estado puede pre-seleccionarse. |
 | `timeRangeDays` (30/60/90) | Si el mapa tiene capa de evolución, usa ese rango para colorear variación. |

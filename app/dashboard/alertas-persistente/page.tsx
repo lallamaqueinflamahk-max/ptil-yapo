@@ -45,8 +45,8 @@ function mockAlertas(): Alerta[] {
       mensaje: "Un concejal concentra 38% de los seguidores (máx. 35%).",
       porQue: "Desbalance en la distribución.",
       accionSugerida: "Revisar estrategia de diversificación.",
-      entidad: "Sosa",
-      filterKey: { type: "ranking", value: "Sosa", label: "Sosa" },
+      entidad: "Referente",
+      filterKey: { type: "ranking", value: "Referente", label: "Referente" },
       createdAt: now,
     },
     {

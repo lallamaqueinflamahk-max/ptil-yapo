@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       situacion: situacion ?? "Independiente",
       seguroSocial: seguroSocial ?? false,
       selfieDataUrl: selfieDataUrl ?? null,
-      promotor: promotor ?? "Miguel Sosa",
+      promotor: promotor ?? "Juan Referente",
       gestorZona: gestorZona ?? "",
       cargoGestor: cargoGestor ?? "",
       seccionalNro: seccionalNro ?? "",

@@ -27,7 +27,7 @@ Grupo B (Historial): Trabajadores empíricos con experiencia comprobable (Genera
 Grupo C (Capacitación): Registros sin respaldo que se derivan automáticamente a programas de formación.
 
 3. Dashboard Pro: Control de Mandos Medios
-Vista exclusiva para el cliente (Miguel Sosa) que permite auditar su estructura de poder:
+Vista exclusiva para el cliente (referente) que permite auditar su estructura de poder:
 
 Ranking de Lealtad: Visualización en tiempo real de la efectividad de Presidentes de Seccional, Convencionales y Miembros.
 

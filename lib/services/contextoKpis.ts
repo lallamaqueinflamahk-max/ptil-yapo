@@ -25,14 +25,14 @@ function buildContextoMock(): ContextoKPIs {
     seccionales: SECCIONALES.length,
     listadoSeccionales,
     seguidoresPorConcejales: [
-      { nombre: "Sosa", seguidores: 4200 },
+      { nombre: "Referente", seguidores: 4200 },
       { nombre: "Lopez", seguidores: 3100 },
       { nombre: "Ruiz", seguidores: 2800 },
       { nombre: "Diaz", seguidores: 2500 },
       { nombre: "Bello", seguidores: 2300 },
     ],
     lealesPorLideres: [
-      { nombre: "Sosa", valor: 32 },
+      { nombre: "Referente", valor: 32 },
       { nombre: "Bello", valor: 21 },
       { nombre: "Fernández", valor: 15 },
       { nombre: "Lopez", valor: 14 },

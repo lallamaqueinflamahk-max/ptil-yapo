@@ -110,12 +110,12 @@ function BloqueA() {
       onClick={() =>
         setChartFilter({
           type: "seccional",
-          value: "Sosa",
-          label: "Seccional Sosa",
+          value: "Referente",
+          label: "Seccional Referente",
         })
       }
     >
-      Filtrar por Sosa
+      Filtrar por Referente
     </button>
   );
 }
@@ -137,4 +137,4 @@ function BloqueB() {
 }
 ```
 
-Si ambos están dentro de `DashboardChartProvider`, al hacer clic en "Filtrar por Sosa" el Bloque B se actualiza de inmediato; al hacer "Limpiar", el Bloque B vuelve a "Ninguno". En la página **Maestro** (`/dashboard/maestro`), el mapa, la tabla de seccionales, los gráficos y las alertas actúan como múltiples "Bloques B" ante los "Bloques A" (KPIs, gráficos, tabla) que llaman `setChartFilter`.
+Si ambos están dentro de `DashboardChartProvider`, al hacer clic en "Filtrar por Referente" el Bloque B se actualiza de inmediato; al hacer "Limpiar", el Bloque B vuelve a "Ninguno". En la página **Maestro** (`/dashboard/maestro`), el mapa, la tabla de seccionales, los gráficos y las alertas actúan como múltiples "Bloques B" ante los "Bloques A" (KPIs, gráficos, tabla) que llaman `setChartFilter`.

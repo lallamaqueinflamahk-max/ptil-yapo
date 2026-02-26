@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui";
 
 const LEALES_POR_LIDERES = [
-  { nombre: "Sosa", valor: 32, color: CHART_PALETTE[0] },
+  { nombre: "Referente", valor: 32, color: CHART_PALETTE[0] },
   { nombre: "Bello", valor: 21, color: CHART_PALETTE[1] },
   { nombre: "Fernández", valor: 15, color: CHART_PALETTE[2] },
   { nombre: "Lopez", valor: 14, color: CHART_PALETTE[3] },

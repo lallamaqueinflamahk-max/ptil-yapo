@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-/** Datos para Dashboard Pro (Miguel Sosa). */
+/** Datos para Dashboard Pro (referente). */
 export async function GET() {
   const data = {
     afiliadosLeales: 4520,
