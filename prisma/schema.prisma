@@ -1,13 +1,13 @@
 // PTIL YAPÓ - Inscripción de subscriptores (suscripción gratuita).
 // Datos para traspaso posterior a la página oficial de YAPÓ.
-// Producción: usar PostgreSQL (DATABASE_URL). Dev: SQLite.
+// Una sola base: PostgreSQL (Neon, Supabase, Vercel Postgres). En Vercel DATABASE_URL es obligatorio.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

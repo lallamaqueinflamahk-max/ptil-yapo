@@ -34,6 +34,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // En producción, comprobar que la base de datos esté configurada (evita error genérico).
+  if (process.env.NODE_ENV === "production") {
+    const dbUrl = process.env.DATABASE_URL?.trim();
+    if (!dbUrl || !dbUrl.startsWith("postgresql")) {
+      return NextResponse.json(
+        {
+          error:
+            "La base de datos no está configurada. Seguí la guía en docs/NEON-SETUP.md (Neon gratis) y agregá DATABASE_URL en Vercel → Settings → Environment Variables.",
+        },
+        { status: 503 }
+      );
+    }
+  }
+
   try {
     const {
       nombreCompleto,
@@ -114,7 +128,7 @@ export async function POST(request: NextRequest) {
     console.error("Error al crear ficha:", e);
 
     const err = e as Error & { code?: string };
-    const errMsg = err?.message ?? "";
+    const errMsg = (err?.message ?? "").toLowerCase();
     let message = "No se pudo guardar la inscripción. Reintentá más tarde.";
 
     if (err?.code === "P2002") {
@@ -126,20 +140,29 @@ export async function POST(request: NextRequest) {
       err?.code === "P1002" ||
       err?.code === "P1003" ||
       err?.code === "P1017" ||
-      errMsg.includes("Could not connect") ||
-      errMsg.includes("SQLITE_CANTOPEN") ||
-      errMsg.includes("ENOENT") ||
-      errMsg.includes("ECONNREFUSED") ||
-      errMsg.includes("Connection refused") ||
-      errMsg.includes("connect ECONNREFUSED") ||
-      errMsg.includes("Can't reach database") ||
+      errMsg.includes("could not connect") ||
+      errMsg.includes("sqlite_cantopen") ||
+      errMsg.includes("enoent") ||
+      errMsg.includes("econnrefused") ||
+      errMsg.includes("connection refused") ||
+      errMsg.includes("can't reach database") ||
       errMsg.includes("timed out") ||
-      errMsg.includes("Authentication failed")
+      errMsg.includes("authentication failed") ||
+      errMsg.includes("invalid prisma") ||
+      errMsg.includes("engine") ||
+      errMsg.includes("schema") ||
+      errMsg.includes("database")
     ) {
       message =
-        "No se pudo conectar a la base de datos. En local: revisá .env (DATABASE_URL) y ejecutá npm run db:push. En producción: configurá DATABASE_URL en Vercel (ej. PostgreSQL o Neon).";
-    } else if (process.env.NODE_ENV === "development" && errMsg) {
-      message = `Error al guardar: ${errMsg.slice(0, 120)}`;
+        "No se pudo conectar a la base de datos. Seguí docs/NEON-SETUP.md y agregá DATABASE_URL en Vercel → Settings → Environment Variables.";
+    } else if (errMsg.includes("relation") && errMsg.includes("does not exist")) {
+      message =
+        "Las tablas aún no existen. Ejecutá una vez desde tu PC: npx prisma db push (con la misma DATABASE_URL en .env). Ver docs/NEON-SETUP.md paso 3.";
+    } else if (process.env.NODE_ENV === "development" && (err as Error)?.message) {
+      message = `Error al guardar: ${((err as Error).message).slice(0, 120)}`;
+    } else if (process.env.NODE_ENV === "production") {
+      message =
+        "No se pudo guardar. Revisá en Vercel que DATABASE_URL esté configurado (base de datos en la nube, ej. Neon o Supabase).";
     }
 
     return NextResponse.json({ error: message }, { status: 500 });
