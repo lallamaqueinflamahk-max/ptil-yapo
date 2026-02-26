@@ -326,6 +326,9 @@ export default function RegisterForm({
           }
         }
       }
+      // Nunca enviar base64 en el body (evita 413). Solo URL de Blob o null.
+      const selfieParaBody =
+        selfieUrl && (selfieUrl.startsWith("http://") || selfieUrl.startsWith("https://")) ? selfieUrl : null;
       const body = {
         nombreCompleto: data.nombreCompleto,
         cedula: data.cedula,
@@ -339,7 +342,7 @@ export default function RegisterForm({
         nivelEstudios: data.nivelEstudios,
         situacion: data.situacion,
         seguroSocial: data.seguroSocial,
-        selfieDataUrl: selfieUrl,
+        selfieDataUrl: selfieParaBody,
         promotor: data.promotor,
         gestorZona: data.gestorZona,
         cargoGestor: data.cargoGestor,
