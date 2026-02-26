@@ -34,14 +34,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // En producción, comprobar que la base de datos esté configurada (evita error genérico).
+  // En producción, solo avisar si DATABASE_URL está vacío o claramente inválido.
   if (process.env.NODE_ENV === "production") {
-    const dbUrl = process.env.DATABASE_URL?.trim();
-    if (!dbUrl || !dbUrl.startsWith("postgresql")) {
+    const dbUrl = process.env.DATABASE_URL?.trim() || "";
+    if (dbUrl.length < 15) {
       return NextResponse.json(
         {
           error:
-            "La base de datos no está configurada. Seguí la guía en docs/NEON-SETUP.md (Neon gratis) y agregá DATABASE_URL en Vercel → Settings → Environment Variables.",
+            "DATABASE_URL no está configurada en Vercel. Settings → Environment Variables → Key: DATABASE_URL (escrito a mano) → Value: tu URL de Neon (postgresql://...) → Save → Redeploy.",
         },
         { status: 503 }
       );
@@ -155,9 +155,12 @@ export async function POST(request: NextRequest) {
     ) {
       message =
         "No se pudo conectar a la base de datos. Seguí docs/NEON-SETUP.md y agregá DATABASE_URL en Vercel → Settings → Environment Variables.";
-    } else if (errMsg.includes("relation") && errMsg.includes("does not exist")) {
+    } else if (
+      errMsg.includes("relation") ||
+      (errMsg.includes("does not exist") && errMsg.includes("ficha"))
+    ) {
       message =
-        "Las tablas aún no existen. Ejecutá una vez desde tu PC: npx prisma db push (con la misma DATABASE_URL en .env). Ver docs/NEON-SETUP.md paso 3.";
+        "Las tablas no existen en Neon. En la carpeta del proyecto ejecutá: npx prisma db push (con DATABASE_URL de Neon en .env). Luego probá de nuevo.";
     } else if (process.env.NODE_ENV === "development" && (err as Error)?.message) {
       message = `Error al guardar: ${((err as Error).message).slice(0, 120)}`;
     } else if (process.env.NODE_ENV === "production") {
