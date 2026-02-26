@@ -27,6 +27,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: errorMessage }, { status });
   }
 
+  if (!body || typeof body !== "object") {
+    return NextResponse.json(
+      { error: "Datos inválidos. Revisá el formulario e intentá de nuevo." },
+      { status: 400 }
+    );
+  }
+
   try {
     const {
       nombreCompleto,
@@ -107,16 +114,32 @@ export async function POST(request: NextRequest) {
     console.error("Error al crear ficha:", e);
 
     const err = e as Error & { code?: string };
+    const errMsg = err?.message ?? "";
     let message = "No se pudo guardar la inscripción. Reintentá más tarde.";
 
     if (err?.code === "P2002") {
       message = "Ya existe una inscripción con esa cédula o código. Usá otra cédula o consultá tu estado con el código que te enviamos.";
-    } else if (err?.code === "P2003" || err?.message?.includes("foreign key")) {
+    } else if (err?.code === "P2003" || errMsg.includes("foreign key")) {
       message = "Error de referencia en la base de datos. Revisá los datos e intentá de nuevo.";
-    } else if (err?.message?.includes("Could not connect") || err?.message?.includes("SQLITE_CANTOPEN") || err?.message?.includes("ENOENT")) {
-      message = "No se pudo conectar a la base de datos. En local ejecutá: npm run db:push y revisá que DATABASE_URL esté en .env (ej. file:./dev.db).";
-    } else if (process.env.NODE_ENV === "development" && err?.message) {
-      message = `Error al guardar: ${err.message.slice(0, 120)}`;
+    } else if (
+      err?.code === "P1001" ||
+      err?.code === "P1002" ||
+      err?.code === "P1003" ||
+      err?.code === "P1017" ||
+      errMsg.includes("Could not connect") ||
+      errMsg.includes("SQLITE_CANTOPEN") ||
+      errMsg.includes("ENOENT") ||
+      errMsg.includes("ECONNREFUSED") ||
+      errMsg.includes("Connection refused") ||
+      errMsg.includes("connect ECONNREFUSED") ||
+      errMsg.includes("Can't reach database") ||
+      errMsg.includes("timed out") ||
+      errMsg.includes("Authentication failed")
+    ) {
+      message =
+        "No se pudo conectar a la base de datos. En local: revisá .env (DATABASE_URL) y ejecutá npm run db:push. En producción: configurá DATABASE_URL en Vercel (ej. PostgreSQL o Neon).";
+    } else if (process.env.NODE_ENV === "development" && errMsg) {
+      message = `Error al guardar: ${errMsg.slice(0, 120)}`;
     }
 
     return NextResponse.json({ error: message }, { status: 500 });
