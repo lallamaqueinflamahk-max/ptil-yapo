@@ -9,6 +9,20 @@ type Body = FormDataLike & {
   gpsLaburo?: GpsPair | null;
 };
 
+/** GET /api/subscriptores?health=1 — Comprueba si DATABASE_URL está configurada (sin tocar la DB). Útil si /api/health/db da 404. */
+export async function GET(request: NextRequest) {
+  if (request.nextUrl.searchParams.get("health") !== "1") {
+    return NextResponse.json({ error: "Usá POST para inscribirte. Para diagnóstico: ?health=1" }, { status: 400 });
+  }
+  const url = process.env.DATABASE_URL?.trim() || "";
+  const configured = url.length >= 15;
+  return NextResponse.json({
+    ok: configured,
+    database: configured ? "configured" : "missing",
+    hint: configured ? undefined : "Agregá DATABASE_URL en Vercel → Settings → Environment Variables y hacé Redeploy.",
+  }, { status: configured ? 200 : 503 });
+}
+
 export async function POST(request: NextRequest) {
   let body: Body;
   try {
@@ -31,6 +45,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "Datos inválidos. Revisá el formulario e intentá de nuevo." },
       { status: 400 }
+    );
+  }
+
+  // POST con { "healthCheck": true } → mismo resultado que GET ?health=1 (evita 405 si el deploy no tiene GET).
+  if ((body as { healthCheck?: boolean }).healthCheck === true) {
+    const url = process.env.DATABASE_URL?.trim() || "";
+    const configured = url.length >= 15;
+    return NextResponse.json(
+      {
+        ok: configured,
+        database: configured ? "configured" : "missing",
+        hint: configured ? undefined : "Agregá DATABASE_URL en Vercel → Settings → Environment Variables y hacé Redeploy.",
+      },
+      { status: configured ? 200 : 503 }
     );
   }
 
@@ -167,7 +195,7 @@ export async function POST(request: NextRequest) {
       const raw = (err as Error)?.message ?? "";
       const sanitized = raw.replace(/postgresql:\/\/[^\s]+/gi, "").replace(/\s+/g, " ").trim().slice(0, 100);
       message =
-        "No se pudo guardar. Comprobá: 1) Abrí en el navegador tu-sitio.vercel.app/api/health/db (debe decir database configured). 2) Si no, agregá DATABASE_URL en Vercel y Redeploy. 3) Revisá Vercel → Deployments → Function Logs para el error real." +
+        "No se pudo guardar. Comprobá: 1) Abrí tu-sitio.vercel.app/api/health/db o tu-sitio.vercel.app/api/subscriptores?health=1 (debe decir database connected o configured). 2) Si dice missing, agregá DATABASE_URL en Vercel y Redeploy. 3) Revisá Vercel → Deployments → Function Logs para el error real." +
         (sanitized ? ` Detalle: ${sanitized}` : "");
     }
 
