@@ -28,6 +28,7 @@ import {
   tipificarOficioIA as tipificarOficioIAClient,
   type TipificacionOficioResult,
 } from "@/lib/api/tipificarOficio";
+import { upload as uploadBlob } from "@vercel/blob/client";
 
 export type FormData = {
   nombreCompleto: string;
@@ -158,7 +159,8 @@ export default function RegisterForm({
     fileInputRef.current?.click();
   };
 
-  const MAX_SELFIE_BASE64_LENGTH = 300000;
+  // La selfie se sube a Vercel Blob y solo enviamos la URL (sin 413). Calidad mejor para preview y subida.
+  const MAX_SELFIE_PREVIEW_LENGTH = 800000;
 
   const compressImageToDataUrl = (file: File, maxWidth: number, quality: number): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -230,10 +232,13 @@ export default function RegisterForm({
     if (!file.type.startsWith("image/")) return;
     e.target.value = "";
     try {
-      let dataUrl = await compressImageToDataUrl(file, 600, 0.58);
-      if (!dataUrl) dataUrl = await compressImageToDataUrl(file, 400, 0.5);
+      let dataUrl = await compressImageToDataUrl(file, 700, 0.6);
+      if (!dataUrl) dataUrl = await compressImageToDataUrl(file, 500, 0.52);
       if (dataUrl) {
-        if (dataUrl.length > MAX_SELFIE_BASE64_LENGTH) {
+        if (dataUrl.length > MAX_SELFIE_PREVIEW_LENGTH) {
+          dataUrl = await compressDataUrlAgain(dataUrl, 500, 0.52);
+        }
+        if (dataUrl.length > MAX_SELFIE_PREVIEW_LENGTH) {
           dataUrl = await compressDataUrlAgain(dataUrl, 400, 0.48);
         }
         update("selfieDataUrl", dataUrl);
@@ -301,13 +306,25 @@ export default function RegisterForm({
     setCodigoVerificacion(null);
     setSubmitError(null);
     try {
-      let selfieToSend = data.selfieDataUrl;
-      if (selfieToSend && selfieToSend.length > MAX_SELFIE_BASE64_LENGTH) {
-        selfieToSend = await compressDataUrlAgain(selfieToSend, 400, 0.45);
-      }
-      if (selfieToSend && selfieToSend.length > 450000) {
-        selfieToSend = null;
-        success("La foto era muy pesada; se envía la inscripción sin foto. Podés actualizarla después.");
+      let selfieUrl: string | null = null;
+      const selfieData = data.selfieDataUrl;
+      if (selfieData) {
+        if (selfieData.startsWith("http://") || selfieData.startsWith("https://")) {
+          selfieUrl = selfieData;
+        } else if (selfieData.startsWith("data:")) {
+          try {
+            const res = await fetch(selfieData);
+            const blob = await res.blob();
+            const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+            const blobResult = await uploadBlob(file.name, file, {
+              handleUploadUrl: "/api/upload/selfie",
+              access: "public",
+            });
+            selfieUrl = blobResult.url;
+          } catch {
+            success("La foto no se pudo subir; se envía la inscripción sin foto.");
+          }
+        }
       }
       const body = {
         nombreCompleto: data.nombreCompleto,
@@ -322,7 +339,7 @@ export default function RegisterForm({
         nivelEstudios: data.nivelEstudios,
         situacion: data.situacion,
         seguroSocial: data.seguroSocial,
-        selfieDataUrl: selfieToSend,
+        selfieDataUrl: selfieUrl,
         promotor: data.promotor,
         gestorZona: data.gestorZona,
         cargoGestor: data.cargoGestor,
