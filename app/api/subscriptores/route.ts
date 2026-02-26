@@ -10,8 +10,24 @@ type Body = FormDataLike & {
 };
 
 export async function POST(request: NextRequest) {
+  let body: Body;
   try {
-    const body = (await request.json()) as Body;
+    body = (await request.json()) as Body;
+  } catch (parseErr) {
+    const msg = parseErr instanceof Error ? parseErr.message : String(parseErr);
+    const isPayloadTooLarge =
+      msg.includes("body") && (msg.includes("limit") || msg.includes("size") || msg.includes("413"));
+    const isInvalidJson = msg.includes("JSON") || msg.includes("parse") || msg.includes("Unexpected");
+    const errorMessage = isPayloadTooLarge
+      ? "La foto pesa demasiado. Sacá otra selfie más simple (solo vos y la herramienta, fondo claro) y reintentá."
+      : isInvalidJson
+        ? "Datos inválidos. Revisá el formulario e intentá de nuevo."
+        : "No se pudo procesar la solicitud. Reintentá más tarde.";
+    const status = isPayloadTooLarge ? 413 : 400;
+    return NextResponse.json({ error: errorMessage }, { status });
+  }
+
+  try {
     const {
       nombreCompleto,
       cedula,
