@@ -158,6 +158,8 @@ export default function RegisterForm({
     fileInputRef.current?.click();
   };
 
+  const MAX_SELFIE_BASE64_LENGTH = 300000;
+
   const compressImageToDataUrl = (file: File, maxWidth: number, quality: number): Promise<string> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -193,23 +195,53 @@ export default function RegisterForm({
     });
   };
 
+  const compressDataUrlAgain = (dataUrl: string, maxWidth: number, quality: number): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        const scale = w > maxWidth ? maxWidth / w : 1;
+        const cw = Math.round(w * scale);
+        const ch = Math.round(h * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = cw;
+        canvas.height = ch;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, cw, ch);
+        try {
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        } catch {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) return;
     e.target.value = "";
     try {
-      const dataUrl = await compressImageToDataUrl(file, 800, 0.72);
-      if (dataUrl) update("selfieDataUrl", dataUrl);
-      else {
-        const reader = new FileReader();
-        reader.onload = () => update("selfieDataUrl", reader.result as string);
-        reader.readAsDataURL(file);
+      let dataUrl = await compressImageToDataUrl(file, 600, 0.58);
+      if (!dataUrl) dataUrl = await compressImageToDataUrl(file, 400, 0.5);
+      if (dataUrl) {
+        if (dataUrl.length > MAX_SELFIE_BASE64_LENGTH) {
+          dataUrl = await compressDataUrlAgain(dataUrl, 400, 0.48);
+        }
+        update("selfieDataUrl", dataUrl);
+      } else {
+        error("No se pudo procesar la foto. Sacá otra selfie.");
       }
     } catch {
-      const reader = new FileReader();
-      reader.onload = () => update("selfieDataUrl", reader.result as string);
-      reader.readAsDataURL(file);
+      error("No se pudo procesar la foto. Sacá otra selfie.");
     }
   };
 
@@ -269,6 +301,14 @@ export default function RegisterForm({
     setCodigoVerificacion(null);
     setSubmitError(null);
     try {
+      let selfieToSend = data.selfieDataUrl;
+      if (selfieToSend && selfieToSend.length > MAX_SELFIE_BASE64_LENGTH) {
+        selfieToSend = await compressDataUrlAgain(selfieToSend, 400, 0.45);
+      }
+      if (selfieToSend && selfieToSend.length > 450000) {
+        selfieToSend = null;
+        success("La foto era muy pesada; se envía la inscripción sin foto. Podés actualizarla después.");
+      }
       const body = {
         nombreCompleto: data.nombreCompleto,
         cedula: data.cedula,
@@ -282,7 +322,7 @@ export default function RegisterForm({
         nivelEstudios: data.nivelEstudios,
         situacion: data.situacion,
         seguroSocial: data.seguroSocial,
-        selfieDataUrl: data.selfieDataUrl,
+        selfieDataUrl: selfieToSend,
         promotor: data.promotor,
         gestorZona: data.gestorZona,
         cargoGestor: data.cargoGestor,
@@ -315,7 +355,7 @@ export default function RegisterForm({
       if (!res.ok) {
         const errMsg =
           res.status === 413
-            ? "La foto pesa demasiado. La app ahora la comprime al subirla; si ves este mensaje, probá sacar otra selfie o cerrar otras apps y reintentar."
+            ? "La foto pesa demasiado. Sacá otra selfie más simple (solo vos y la herramienta, fondo claro) y reintentá."
             : (json?.error ?? "No se pudo guardar la inscripción.");
         setSubmitError(errMsg);
         error(errMsg);
