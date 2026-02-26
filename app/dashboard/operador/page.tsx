@@ -76,13 +76,6 @@ export default function DashboardOperadorPage() {
     if (c) setCedula(c);
     if (s) setSeccionalNro(s);
     if (c) setPerfilGuardado(true);
-    // #region agent log
-    fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" },
-      body: JSON.stringify({ sessionId: "a4fa08", location: "operador/page.tsx:mount", message: "operador page mounted", data: { hasCedula: !!c, hasSeccional: !!s }, timestamp: Date.now(), hypothesisId: "C" }),
-    }).catch(() => {});
-    // #endregion
   }, []);
 
   const guardarPerfil = useCallback(async () => {
@@ -118,22 +111,6 @@ export default function DashboardOperadorPage() {
 
   const operadorProfileUrl = perfilGuardado && cedula ? `/api/operador?cedula=${encodeURIComponent(cedula)}` : null;
   const { data: operadorProfileRaw, error: operadorProfileError, mutate: mutateOperadorProfile } = useSWR<{ nombreCompleto?: string | null; whatsapp?: string | null; avatarUrl?: string | null; error?: string }>(operadorProfileUrl, fetcher);
-  // #region agent log
-  if (typeof window !== "undefined") {
-    fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" },
-      body: JSON.stringify({
-        sessionId: "a4fa08",
-        location: "operador/page.tsx:SWR",
-        message: "operador profile state",
-        data: { operadorProfileUrl, hasData: !!operadorProfileRaw, hasError: !!operadorProfileError, dataKeys: operadorProfileRaw ? Object.keys(operadorProfileRaw) : [], errorInData: operadorProfileRaw && "error" in operadorProfileRaw ? (operadorProfileRaw as { error?: string }).error : null },
-        timestamp: Date.now(),
-        hypothesisId: "A",
-      }),
-    }).catch(() => {});
-  }
-  // #endregion
   const operadorProfile = operadorProfileRaw && !("error" in operadorProfileRaw && operadorProfileRaw.error) ? operadorProfileRaw : undefined;
   const operadorAvatarInputRef = useRef<HTMLInputElement>(null);
 

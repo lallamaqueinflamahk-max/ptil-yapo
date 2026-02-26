@@ -43,7 +43,7 @@ Frontend: Next.js 14 (App Router) y Tailwind CSS para una UI rápida y responsiv
 
 Backend: Node.js con Edge Functions en Vercel para procesamiento de baja latencia.
 
-Base de datos (inscripción de subscriptores): Prisma ORM con SQLite (desarrollo) o PostgreSQL (producción). Cada ficha tiene un **código de seguridad** (uso interno/traspaso a YAPÓ oficial) y un **código de verificación** (consulta pública del estado). Ver `.env.example` para `DATABASE_URL`. Comandos: `npm run db:generate`, `npm run db:push` o `npm run db:migrate`.
+Base de datos (inscripción de subscriptores): Prisma ORM con SQLite (desarrollo) o PostgreSQL (producción). Cada ficha tiene un **código de seguridad** (uso interno/traspaso a YAPÓ oficial) y un **código de verificación** (consulta pública del estado). **Primera vez:** copiá `.env.example` a `.env` (ya incluye `DATABASE_URL="file:./dev.db"`) y ejecutá `npm run db:push` para crear las tablas. Comandos: `npm run db:generate`, `npm run db:push` o `npm run db:migrate`.
 
 Inteligencia Artificial: Modelos multimodales para tipificación de oficios y auditoría de imágenes.
 

@@ -138,12 +138,8 @@ export default function RegisterForm({
 
   const validateStep3 = () => {
     if (masterKey) return true;
-    return (
-      data.gestorZona !== "" &&
-      data.cargoGestor !== "" &&
-      data.seccionalNro.trim() !== "" &&
-      (isOperatorFlow ? data.cedulaOperador.trim() !== "" : true)
-    );
+    // Paso 3 opcional para pruebas: podés guardar sin completar respaldo (en backend se guarda "Prueba").
+    return isOperatorFlow ? data.cedulaOperador.trim() !== "" : true;
   };
 
   const canNext1 = validateStep1();
@@ -162,14 +158,59 @@ export default function RegisterForm({
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImageToDataUrl = (file: File, maxWidth: number, quality: number): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        const scale = w > maxWidth ? maxWidth / w : 1;
+        const cw = Math.round(w * scale);
+        const ch = Math.round(h * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = cw;
+        canvas.height = ch;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve("");
+          return;
+        }
+        ctx.drawImage(img, 0, 0, cw, ch);
+        try {
+          const dataUrl = canvas.toDataURL("image/jpeg", quality);
+          resolve(dataUrl);
+        } catch {
+          resolve("");
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("No se pudo cargar la imagen"));
+      };
+      img.src = url;
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => update("selfieDataUrl", reader.result as string);
-    reader.readAsDataURL(file);
     e.target.value = "";
+    try {
+      const dataUrl = await compressImageToDataUrl(file, 800, 0.72);
+      if (dataUrl) update("selfieDataUrl", dataUrl);
+      else {
+        const reader = new FileReader();
+        reader.onload = () => update("selfieDataUrl", reader.result as string);
+        reader.readAsDataURL(file);
+      }
+    } catch {
+      const reader = new FileReader();
+      reader.onload = () => update("selfieDataUrl", reader.result as string);
+      reader.readAsDataURL(file);
+    }
   };
 
   const activateGps = () => {
@@ -227,9 +268,6 @@ export default function RegisterForm({
     setSubmitLoading(true);
     setCodigoVerificacion(null);
     setSubmitError(null);
-    // #region agent log
-    fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:handleSubmit", message: "submit started", data: { step, hasSelfie: !!data.selfieDataUrl, hasGps: !!gpsCoords }, hypothesisId: "H5", timestamp: Date.now() }) }).catch(() => {});
-    // #endregion
     try {
       const body = {
         nombreCompleto: data.nombreCompleto,
@@ -254,17 +292,11 @@ export default function RegisterForm({
         gpsCasa: gpsCasaCoords ? { lat: gpsCasaCoords.lat, lng: gpsCasaCoords.lng } : null,
         gpsLaburo: gpsLaburoCoords ? { lat: gpsLaburoCoords.lat, lng: gpsLaburoCoords.lng } : null,
       };
-      // #region agent log
-      fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:beforeFetch", message: "calling fetch", data: { url: "/api/subscriptores" }, hypothesisId: "H1", timestamp: Date.now() }) }).catch(() => {});
-      // #endregion
       const res = await fetch("/api/subscriptores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      // #region agent log
-      fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:afterFetch", message: "fetch completed", data: { status: res.status, ok: res.ok, contentType: res.headers.get("content-type") }, hypothesisId: "H1,H2", timestamp: Date.now() }) }).catch(() => {});
-      // #endregion
       const contentType = res.headers.get("content-type") || "";
       let json: { error?: string; codigoVerificacion?: string } = {};
       if (contentType.includes("application/json")) {
@@ -281,13 +313,13 @@ export default function RegisterForm({
         }
       }
       if (!res.ok) {
-        const errMsg = json?.error ?? "No se pudo guardar la inscripción.";
+        const errMsg =
+          res.status === 413
+            ? "La foto pesa demasiado. La app ahora la comprime al subirla; si ves este mensaje, probá sacar otra selfie o cerrar otras apps y reintentar."
+            : (json?.error ?? "No se pudo guardar la inscripción.");
         setSubmitError(errMsg);
         error(errMsg);
         setSubmitLoading(false);
-        // #region agent log
-        fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:resNotOk", message: "API error response", data: { status: res.status, error: errMsg }, hypothesisId: "H2", timestamp: Date.now() }) }).catch(() => {});
-        // #endregion
         return;
       }
       setSubmitLoading(false);
@@ -297,9 +329,6 @@ export default function RegisterForm({
       success("Inscripción guardada. Guardá tu código de verificación.");
       setTimeout(() => onClose(), 4000);
     } catch (e) {
-      // #region agent log
-      fetch("http://127.0.0.1:7245/ingest/039a586b-016e-41a6-bbd7-7d228a8b81c8", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "a4fa08" }, body: JSON.stringify({ sessionId: "a4fa08", location: "RegisterForm.tsx:catch", message: "submit catch", data: { errName: (e as Error)?.name, errMessage: (e as Error)?.message }, hypothesisId: "H1,H2,H5", timestamp: Date.now() }) }).catch(() => {});
-      // #endregion
       const isNetworkError =
         e instanceof TypeError && (e.message === "Failed to fetch" || e.message.includes("NetworkError"));
       const errMsg = isNetworkError
@@ -311,11 +340,9 @@ export default function RegisterForm({
     }
   };
 
-  const step3Missing = [];
-  if (data.gestorZona === "") step3Missing.push("Gestor de zona");
-  if (data.cargoGestor === "") step3Missing.push("Cargo gestor");
-  if (data.seccionalNro.trim() === "") step3Missing.push("Seccional");
+  const step3Missing: string[] = [];
   if (isOperatorFlow && data.cedulaOperador.trim() === "") step3Missing.push("Cédula del Operador YAPÓ");
+  const step3Opcional = !isOperatorFlow && (!data.gestorZona || !data.cargoGestor || !data.seccionalNro.trim());
 
   return (
     <div className="fixed inset-0 z-50 bg-yapo-gray overflow-y-auto">
@@ -919,6 +946,11 @@ export default function RegisterForm({
                     {!canNext3 && step3Missing.length > 0 && (
                       <span className="text-xs text-amber-700">
                         Para enviar completá: {step3Missing.join(", ")}
+                      </span>
+                    )}
+                    {canNext3 && step3Opcional && (
+                      <span className="text-xs text-gray-600">
+                        Respaldo opcional: podés enviar así para probar (se guarda como prueba y podés consultar tu estado con el código).
                       </span>
                     )}
                   </div>
