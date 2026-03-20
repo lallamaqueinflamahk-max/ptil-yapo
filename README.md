@@ -2,6 +2,8 @@
 
 **Nota:** En la interfaz del dashboard el producto se presenta como **Territorio Command**. El **Design System** que unifica colores, componentes y patrones se llama **SENTINEL360** (ver `docs/DESIGN-SYSTEM-SENTINEL360.md`).
 
+📄 **Auditoría, estado del producto y estrategia (lenguaje simple):** [docs/AUDITORIA-Y-ESTRATEGIA.md](docs/AUDITORIA-Y-ESTRATEGIA.md)
+
 📋 Descripción General
 YAPÓ es una plataforma Insurtech y de gestión territorial desarrollada por Guaraní Global Tech (GGT). El sistema implementa el Operativo PTIL, un censo digital diseñado para organizar y formalizar la fuerza laboral informal de Asunción.
 
